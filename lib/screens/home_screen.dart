@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../models/theme_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,6 +14,14 @@ class HomeScreen extends StatelessWidget {
         title: const Text('足弓觉醒'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.palette),
+            onPressed: () {
+              context.go('/theme-selection');
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -42,7 +53,7 @@ class HomeScreen extends StatelessWidget {
               '今日训练计划',
               'Today\'s Training Plan',
               Icons.calendar_today,
-              const Color(0xFF00695C), // Deep teal
+              Theme.of(context).colorScheme.primary,
               () => context.go('/training-plan'),
             ),
             const SizedBox(height: 16),
@@ -51,7 +62,7 @@ class HomeScreen extends StatelessWidget {
               '训练项目',
               'Training Exercises',
               Icons.fitness_center,
-              const Color(0xFF009688), // Bright teal
+              Theme.of(context).colorScheme.primary,
               () => context.go('/training-list'),
             ),
             const SizedBox(height: 16),
@@ -60,7 +71,7 @@ class HomeScreen extends StatelessWidget {
               '训练记录',
               'Training Records',
               Icons.history,
-              const Color(0xFF1976D2), // Peacock blue
+              Theme.of(context).colorScheme.primary,
               () => context.go('/training-records'),
             ),
           ],

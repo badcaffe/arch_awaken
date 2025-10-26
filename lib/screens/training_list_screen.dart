@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/training_model.dart';
+import '../models/theme_model.dart';
 
 class TrainingListScreen extends StatelessWidget {
   const TrainingListScreen({super.key});
@@ -10,7 +11,8 @@ class TrainingListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trainingModel = Provider.of<TrainingModel>(context);
-    final exercises = trainingModel.exercises;
+    final themeModel = Provider.of<ThemeModel>(context);
+    final exercises = trainingModel.getExercisesWithTheme(themeModel);
 
     return Scaffold(
       appBar: AppBar(

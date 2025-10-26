@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'theme_model.dart';
 
 enum ExerciseType { timer, counter }
 
@@ -62,7 +65,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.counter,
       icon: Icons.sports_baseball,
-      color: const Color(0xFF00695C), // Deep teal
+      color: Colors.grey, // Will be overridden by theme
     ),
     TrainingExercise(
       id: 'yoga_brick_tiptoe',
@@ -70,7 +73,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.counter,
       icon: Icons.square,
-      color: const Color(0xFF00796B), // Medium teal
+      color: Colors.grey, // Will be overridden by theme
     ),
     TrainingExercise(
       id: 'yoga_brick_ball_pickup',
@@ -78,7 +81,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.counter,
       icon: Icons.sports_baseball_outlined,
-      color: const Color(0xFF009688), // Bright teal
+      color: Colors.grey, // Will be overridden by theme
     ),
     TrainingExercise(
       id: 'frog_pose',
@@ -86,7 +89,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.timer,
       icon: Icons.accessibility,
-      color: const Color(0xFF4DB6AC), // Light teal
+      color: Colors.grey, // Will be overridden by theme
     ),
     TrainingExercise(
       id: 'glute_bridge',
@@ -94,7 +97,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.counter,
       icon: Icons.fitness_center,
-      color: const Color(0xFF1976D2), // Peacock blue
+      color: Colors.grey, // Will be overridden by theme
     ),
     TrainingExercise(
       id: 'stretching',
@@ -102,7 +105,7 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.timer,
       icon: Icons.self_improvement,
-      color: const Color(0xFF7B1FA2), // Peacock purple
+      color: Colors.grey, // Will be overridden by theme
     ),
   ];
 
@@ -114,6 +117,19 @@ class TrainingModel extends ChangeNotifier {
   }
 
   List<TrainingExercise> get exercises => _exercises;
+
+  List<TrainingExercise> getExercisesWithTheme(ThemeModel themeModel) {
+    return _exercises.map((exercise) {
+      return TrainingExercise(
+        id: exercise.id,
+        name: exercise.name,
+        description: exercise.description,
+        type: exercise.type,
+        icon: exercise.icon,
+        color: themeModel.getExerciseColor(exercise.id),
+      );
+    }).toList();
+  }
 
   TrainingExercise? getExerciseById(String id) {
     return _exercises.firstWhere((exercise) => exercise.id == id);

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
+import '../models/theme_model.dart';
 
 class TrainingPlanScreen extends StatelessWidget {
   const TrainingPlanScreen({super.key});
@@ -116,9 +117,20 @@ class TrainingPlanScreen extends StatelessWidget {
                   final exerciseId = planItem['exerciseId'] as String;
                   final target = planItem['target'] as int;
                   final completed = planItem['completed'] as bool;
-                  final exercise = trainingModel.getExerciseById(exerciseId);
+                  final themeModel = Provider.of<ThemeModel>(context);
+                  final baseExercise = trainingModel.getExerciseById(exerciseId);
 
-                  if (exercise == null) return const SizedBox.shrink();
+                  if (baseExercise == null) return const SizedBox.shrink();
+
+                  // Create exercise with theme color
+                  final exercise = TrainingExercise(
+                    id: baseExercise.id,
+                    name: baseExercise.name,
+                    description: baseExercise.description,
+                    type: baseExercise.type,
+                    icon: baseExercise.icon,
+                    color: themeModel.getExerciseColor(baseExercise.id),
+                  );
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),

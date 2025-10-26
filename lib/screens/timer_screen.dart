@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
+import '../models/theme_model.dart';
 
 class TimerScreen extends StatefulWidget {
   final String exerciseId;
@@ -106,9 +107,10 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     final trainingModel = Provider.of<TrainingModel>(context);
-    final exercise = trainingModel.getExerciseById(widget.exerciseId);
+    final themeModel = Provider.of<ThemeModel>(context);
+    final baseExercise = trainingModel.getExerciseById(widget.exerciseId);
 
-    if (exercise == null) {
+    if (baseExercise == null) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('错误'),
@@ -118,6 +120,16 @@ class _TimerScreenState extends State<TimerScreen> {
         ),
       );
     }
+
+    // Create exercise with theme color
+    final exercise = TrainingExercise(
+      id: baseExercise.id,
+      name: baseExercise.name,
+      description: baseExercise.description,
+      type: baseExercise.type,
+      icon: baseExercise.icon,
+      color: themeModel.getExerciseColor(baseExercise.id),
+    );
 
     return Scaffold(
       appBar: AppBar(

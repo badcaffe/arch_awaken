@@ -3,12 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import 'models/training_model.dart';
+import 'models/theme_model.dart';
 import 'screens/home_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/training_plan_screen.dart';
 import 'screens/training_records_screen.dart';
 import 'screens/timer_screen.dart';
 import 'screens/counter_screen.dart';
+import 'screens/theme_selection_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -59,6 +61,12 @@ class ArchAwakenApp extends StatelessWidget {
                 return CounterScreen(exerciseId: exerciseId);
               },
             ),
+            GoRoute(
+              path: 'theme-selection',
+              builder: (BuildContext context, GoRouterState state) {
+                return const ThemeSelectionScreen();
+              },
+            ),
           ],
         ),
       ],
@@ -67,17 +75,19 @@ class ArchAwakenApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => TrainingModel()),
+        ChangeNotifierProvider(create: (context) => ThemeModel()),
       ],
-      child: MaterialApp.router(
-        title: 'Arch Awaken',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF00695C), // Deep teal as peacock base
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        routerConfig: _router,
+      child: Consumer<ThemeModel>(
+        builder: (context, themeModel, child) {
+          return MaterialApp.router(
+            title: 'Arch Awaken',
+            theme: ThemeData(
+              colorScheme: themeModel.currentAppTheme.colorScheme,
+              useMaterial3: true,
+            ),
+            routerConfig: _router,
+          );
+        },
       ),
     );
   }
