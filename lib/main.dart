@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import 'models/training_model.dart';
 import 'models/theme_model.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_tab_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/training_plan_screen.dart';
 import 'screens/training_records_screen.dart';
 import 'screens/timer_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/theme_selection_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -26,7 +27,7 @@ class ArchAwakenApp extends StatelessWidget {
         GoRoute(
           path: '/',
           builder: (BuildContext context, GoRouterState state) {
-            return const HomeScreen();
+            return const MainTabScreen();
           },
           routes: <RouteBase>[
             GoRoute(
@@ -84,6 +85,9 @@ class ArchAwakenApp extends StatelessWidget {
             theme: ThemeData(
               colorScheme: themeModel.currentAppTheme.colorScheme,
               useMaterial3: true,
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              hoverColor: Colors.transparent,
             ),
             routerConfig: _router,
           );

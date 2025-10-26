@@ -1,11 +1,11 @@
 {
-    "name": "arch_awaken",
-    "short_name": "arch_awaken",
+    "name": "Arch Awaken",
+    "short_name": "Arch Awaken",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#00695C",
+    "theme_color": "#00695C",
+    "description": "Flat foot training application for arch awakening exercises",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -51,6 +51,9 @@ class TrainingListScreen extends StatelessWidget {
           }
         },
         borderRadius: BorderRadius.circular(12),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(

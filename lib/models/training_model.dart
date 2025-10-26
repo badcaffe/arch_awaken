@@ -112,8 +112,13 @@ class TrainingModel extends ChangeNotifier {
   List<TrainingRecord> _records = [];
   List<TrainingRecord> get records => _records;
 
+  // Achievement tracking
+  Set<String> _unlockedAchievements = {};
+  Set<String> get unlockedAchievements => _unlockedAchievements;
+
   TrainingModel() {
     _loadRecords();
+    _loadAchievements();
   }
 
   List<TrainingExercise> get exercises => _exercises;
@@ -138,6 +143,7 @@ class TrainingModel extends ChangeNotifier {
   void addRecord(TrainingRecord record) {
     _records.add(record);
     _saveRecords();
+    checkAndUnlockAchievements();
     notifyListeners();
   }
 
@@ -172,5 +178,148 @@ class TrainingModel extends ChangeNotifier {
         .map((record) => json.encode(record.toJson()))
         .toList();
     await prefs.setStringList('training_records', recordsJson);
+  }
+
+  // Achievement methods
+  void unlockAchievement(String achievementId) {
+    if (!_unlockedAchievements.contains(achievementId)) {
+      _unlockedAchievements.add(achievementId);
+      _saveAchievements();
+      notifyListeners();
+    }
+  }
+
+  bool hasAchievement(String achievementId) {
+    return _unlockedAchievements.contains(achievementId);
+  }
+
+  Future<void> _loadAchievements() async {
+    final prefs = await SharedPreferences.getInstance();
+    final achievementsList = prefs.getStringList('achievements') ?? [];
+    _unlockedAchievements = Set<String>.from(achievementsList);
+    notifyListeners();
+  }
+
+  Future<void> _saveAchievements() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('achievements', _unlockedAchievements.toList());
+  }
+
+  // Achievement checking methods
+  void checkAndUnlockAchievements() {
+    // Check for 7-day streak
+    if (_hasSevenDayStreak() && !hasAchievement('7_day_streak')) {
+      unlockAchievement('7_day_streak');
+    }
+
+    // Check for first week completion
+    if (_hasCompletedFirstWeek() && !hasAchievement('first_week')) {
+      unlockAchievement('first_week');
+    }
+
+    // Check for arch awakening (one month)
+    if (_hasArchAwakening() && !hasAchievement('arch_awakening')) {
+      unlockAchievement('arch_awakening');
+    }
+
+    // Check for ball tiptoe expert
+    if (_hasBallTiptoeExpert() && !hasAchievement('ball_tiptoe_expert')) {
+      unlockAchievement('ball_tiptoe_expert');
+    }
+
+    // Check for yoga master
+    if (_hasYogaMaster() && !hasAchievement('yoga_master')) {
+      unlockAchievement('yoga_master');
+    }
+
+    // Check for stretching expert
+    if (_hasStretchingExpert() && !hasAchievement('stretching_expert')) {
+      unlockAchievement('stretching_expert');
+    }
+  }
+
+  bool _hasSevenDayStreak() {
+    // Simple implementation - check if user has trained for 7 consecutive days
+    final today = DateTime.now();
+    final trainingDays = <DateTime>{};
+
+    for (var record in _records) {
+      final date = DateTime(record.date.year, record.date.month, record.date.day);
+      trainingDays.add(date);
+    }
+
+    // Check for 7 consecutive days
+    for (int i = 0; i < 7; i++) {
+      final checkDate = today.subtract(Duration(days: i));
+      if (!trainingDays.contains(checkDate)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _hasCompletedFirstWeek() {
+    // Check if user has at least 7 training days total
+    final trainingDays = <DateTime>{};
+    for (var record in _records) {
+      final date = DateTime(record.date.year, record.date.month, record.date.day);
+      trainingDays.add(date);
+    }
+    return trainingDays.length >= 7;
+  }
+
+  bool _hasBallTiptoeExpert() {
+    // Check if user has completed 100 ball tiptoe exercises
+    final ballTiptoeRecords = _records
+        .where((record) => record.exerciseId == 'ball_tiptoe')
+        .toList();
+    if (ballTiptoeRecords.isEmpty) return false;
+    final totalCount = ballTiptoeRecords
+        .map((record) => record.count)
+        .reduce((a, b) => a + b);
+    return totalCount >= 100;
+  }
+
+  bool _hasArchAwakening() {
+    // Check if user has at least 30 training days total
+    final trainingDays = <DateTime>{};
+    for (var record in _records) {
+      final date = DateTime(record.date.year, record.date.month, record.date.day);
+      trainingDays.add(date);
+    }
+    return trainingDays.length >= 30;
+  }
+
+  bool _hasYogaMaster() {
+    // Check if user has completed all yoga brick exercises
+    final yogaBrickTiptoeRecords = _records
+        .where((record) => record.exerciseId == 'yoga_brick_tiptoe')
+        .toList();
+    final yogaBrickBallRecords = _records
+        .where((record) => record.exerciseId == 'yoga_brick_ball_pickup')
+        .toList();
+
+    if (yogaBrickTiptoeRecords.isEmpty || yogaBrickBallRecords.isEmpty) return false;
+
+    final tiptoeTotal = yogaBrickTiptoeRecords
+        .map((record) => record.count)
+        .reduce((a, b) => a + b);
+    final ballTotal = yogaBrickBallRecords
+        .map((record) => record.count)
+        .reduce((a, b) => a + b);
+
+    return tiptoeTotal >= 50 && ballTotal >= 50;
+  }
+
+  bool _hasStretchingExpert() {
+    // Check if user has accumulated 60 minutes of stretching
+    final stretchingRecords = _records
+        .where((record) => record.exerciseId == 'stretching')
+        .toList();
+    if (stretchingRecords.isEmpty) return false;
+    final totalDuration = stretchingRecords
+        .map((record) => record.duration)
+        .reduce((a, b) => a + b);
+    return totalDuration >= 3600; // 60 minutes in seconds
   }
 }

@@ -22,7 +22,7 @@ class _TimerScreenState extends State<TimerScreen> {
   static const int _initialTime = 60; // 60 seconds
   int _remainingTime = _initialTime;
   bool _isRunning = false;
-  late Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -58,7 +58,7 @@ class _TimerScreenState extends State<TimerScreen> {
     setState(() {
       _isRunning = false;
     });
-    _timer.cancel();
+    _timer?.cancel();
   }
 
   void _resetTimer() {
@@ -66,7 +66,7 @@ class _TimerScreenState extends State<TimerScreen> {
       _isRunning = false;
       _remainingTime = _initialTime;
     });
-    _timer.cancel();
+    _timer?.cancel();
   }
 
   void _saveRecord() {

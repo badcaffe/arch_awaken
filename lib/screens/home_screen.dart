@@ -95,6 +95,9 @@ class HomeScreen extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
