@@ -13,7 +13,7 @@ class ThemeSelectionScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配色方案'),
+        title: const Text('配色主题'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
@@ -23,7 +23,7 @@ class ThemeSelectionScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '选择您喜欢的配色方案',
+              '选择您喜欢的配色主题',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -31,7 +31,7 @@ class ThemeSelectionScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '配色方案将立即生效',
+              '配色主题将立即生效',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -50,13 +50,13 @@ class ThemeSelectionScreen extends StatelessWidget {
                   final isSelected = themeModel.currentTheme == theme;
 
                   return Card(
-                    elevation: isSelected ? 4 : 2,
-                    color: isSelected ? primaryColor.withOpacity(0.05) : Colors.white,
+                    elevation: 0,
+                    color: isSelected ? primaryColor.withOpacity(0.02) : Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? primaryColor : Colors.transparent,
-                        width: isSelected ? 2 : 0,
+                        color: isSelected ? primaryColor : Colors.grey[200]!,
+                        width: isSelected ? 1 : 1,
                       ),
                     ),
                     child: ListTile(
@@ -66,17 +66,13 @@ class ThemeSelectionScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: primaryColor,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: primaryColor.withOpacity(0.3),
-                            width: 2,
-                          ),
                         ),
                       ),
                       title: Text(
                         name,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                           color: isSelected ? primaryColor : Colors.black,
                         ),
                       ),
@@ -91,6 +87,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                           ? Icon(
                               Icons.check_circle,
                               color: primaryColor,
+                              size: 20,
                             )
                           : null,
                       onTap: () {
@@ -103,6 +100,7 @@ class ThemeSelectionScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Card(
+              elevation: 0,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -143,10 +141,6 @@ class ThemeSelectionScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(
-              color: color.withOpacity(0.3),
-              width: 2,
-            ),
           ),
         ),
         const SizedBox(height: 4),

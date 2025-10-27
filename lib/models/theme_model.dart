@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ThemeScheme {
-  peacock,   // 孔雀色调
+  ocean,     // 海洋色调
   sunset,    // 日落色调
   forest,    // 森林色调
-  ocean,     // 海洋色调
   lavender,  // 薰衣草色调
 }
 
@@ -24,28 +23,13 @@ class AppTheme {
 class ThemeModel extends ChangeNotifier {
   static const String _themeKey = 'selected_theme';
 
-  ThemeScheme _currentTheme = ThemeScheme.peacock;
+  ThemeScheme _currentTheme = ThemeScheme.ocean;
 
   ThemeScheme get currentTheme => _currentTheme;
 
   final Map<ThemeScheme, AppTheme> _themes = {
-    ThemeScheme.peacock: AppTheme(
-      name: '孔雀色调',
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF00695C),
-        brightness: Brightness.light,
-      ),
-      exerciseColors: {
-        'ball_tiptoe': const Color(0xFF00695C), // Deep teal
-        'yoga_brick_tiptoe': const Color(0xFF00796B), // Medium teal
-        'yoga_brick_ball_pickup': const Color(0xFF009688), // Bright teal
-        'frog_pose': const Color(0xFF4DB6AC), // Light teal
-        'glute_bridge': const Color(0xFF1976D2), // Peacock blue
-        'stretching': const Color(0xFF7B1FA2), // Peacock purple
-      },
-    ),
     ThemeScheme.sunset: AppTheme(
-      name: '日落色调',
+      name: '日落',
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFFE65100),
         brightness: Brightness.light,
@@ -60,7 +44,7 @@ class ThemeModel extends ChangeNotifier {
       },
     ),
     ThemeScheme.forest: AppTheme(
-      name: '森林色调',
+      name: '森林',
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF2E7D32),
         brightness: Brightness.light,
@@ -75,7 +59,7 @@ class ThemeModel extends ChangeNotifier {
       },
     ),
     ThemeScheme.ocean: AppTheme(
-      name: '海洋色调',
+      name: '海洋',
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF1565C0),
         brightness: Brightness.light,
@@ -90,7 +74,7 @@ class ThemeModel extends ChangeNotifier {
       },
     ),
     ThemeScheme.lavender: AppTheme(
-      name: '薰衣草色调',
+      name: '薰衣草',
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF7B1FA2),
         brightness: Brightness.light,
@@ -137,10 +121,10 @@ class ThemeModel extends ChangeNotifier {
   List<Map<String, dynamic>> getThemeOptions() {
     return [
       {
-        'theme': ThemeScheme.peacock,
-        'name': '孔雀色调',
-        'primaryColor': const Color(0xFF00695C),
-        'description': '优雅的蓝绿色调，灵感来自孔雀羽毛',
+        'theme': ThemeScheme.ocean,
+        'name': '海洋色调',
+        'primaryColor': const Color(0xFF1565C0),
+        'description': '清新的蓝色调，带来海洋般的宁静',
       },
       {
         'theme': ThemeScheme.sunset,
@@ -153,12 +137,6 @@ class ThemeModel extends ChangeNotifier {
         'name': '森林色调',
         'primaryColor': const Color(0xFF2E7D32),
         'description': '自然的绿色调，带来森林般的宁静',
-      },
-      {
-        'theme': ThemeScheme.ocean,
-        'name': '海洋色调',
-        'primaryColor': const Color(0xFF1565C0),
-        'description': '清新的蓝色调，带来海洋般的宁静',
       },
       {
         'theme': ThemeScheme.lavender,

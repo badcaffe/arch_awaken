@@ -155,196 +155,198 @@ class _CounterScreenState extends State<CounterScreen> {
         backgroundColor: exercise.color,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_isCountingDown)
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00695C).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF00695C),
-                        width: 4,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        _countdownValue.toString(),
-                        style: const TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (_isCountingDown)
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00695C).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
                           color: const Color(0xFF00695C),
+                          width: 4,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _countdownValue.toString(),
+                          style: const TextStyle(
+                            fontSize: 64,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF00695C),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '准备开始',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: const Color(0xFF00695C),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: exercise.color.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: exercise.color,
-                        width: 4,
+                    const SizedBox(height: 20),
+                    const Text(
+                      '准备开始',
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: const Color(0xFF00695C),
                       ),
                     ),
-                    child: Center(
-                      child: Text(
-                        _count.toString(),
-                        style: TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
+                  ],
+                )
+              else
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: exercise.color.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
                           color: exercise.color,
+                          width: 4,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _count.toString(),
+                          style: TextStyle(
+                            fontSize: 64,
+                            fontWeight: FontWeight.bold,
+                            color: exercise.color,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    '训练次数',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
+                    const SizedBox(height: 20),
+                    Text(
+                      '训练次数',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '用时: ${_trainingDuration}秒',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 40),
+              Text(
+                exercise.description,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+              if (!_isRunning && _count == 0)
+                ElevatedButton.icon(
+                  onPressed: _startTraining,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('开始训练'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '用时: ${_trainingDuration}秒',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[500],
+                )
+              else if (_isRunning && !_isCountingDown)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _incrementCount,
+                      icon: const Icon(Icons.add),
+                      label: const Text('完成一次'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: exercise.color,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 40),
-            Text(
-              exercise.description,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            if (!_isRunning && _count == 0)
-              ElevatedButton.icon(
-                onPressed: _startTraining,
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('开始训练'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
+                    ElevatedButton.icon(
+                      onPressed: _pauseTraining,
+                      icon: const Icon(Icons.pause),
+                      label: const Text('暂停'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00695C),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else if (!_isRunning && _count > 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _startTraining,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('继续'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _completeTraining,
+                      icon: const Icon(Icons.check),
+                      label: const Text('完成'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 20),
+              if (_count > 0 || _isRunning)
+                ElevatedButton.icon(
+                  onPressed: _resetTraining,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('重置'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                 ),
-              )
-            else if (_isRunning && !_isCountingDown)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _incrementCount,
-                    icon: const Icon(Icons.add),
-                    label: const Text('完成一次'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: exercise.color,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _pauseTraining,
-                    icon: const Icon(Icons.pause),
-                    label: const Text('暂停'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00695C),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            else if (!_isRunning && _count > 0)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _startTraining,
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('继续'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _completeTraining,
-                    icon: const Icon(Icons.check),
-                    label: const Text('完成'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 20),
-            if (_count > 0 || _isRunning)
-              ElevatedButton.icon(
-                onPressed: _resetTraining,
-                icon: const Icon(Icons.refresh),
-                label: const Text('重置'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
