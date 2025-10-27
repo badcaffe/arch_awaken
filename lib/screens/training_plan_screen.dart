@@ -102,7 +102,7 @@ class TrainingPlanScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              '训练项目',
+              '训练目标',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -189,6 +189,10 @@ class TrainingPlanScreen extends StatelessWidget {
                                   context.go('/counter/$exerciseId');
                                 }
                               },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
                               child: const Text('开始训练'),
                             ),
                     ),

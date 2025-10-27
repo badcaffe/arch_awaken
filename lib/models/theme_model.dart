@@ -6,6 +6,7 @@ enum ThemeScheme {
   sunset,    // 日落色调
   forest,    // 森林色调
   lavender,  // 薰衣草色调
+  dark,      // 暗黑色调
 }
 
 class AppTheme {
@@ -88,6 +89,48 @@ class ThemeModel extends ChangeNotifier {
         'stretching': const Color(0xFF3F51B5), // Indigo
       },
     ),
+    ThemeScheme.dark: AppTheme(
+      name: '暗黑',
+      colorScheme: ColorScheme(
+        brightness: Brightness.dark,
+        primary: const Color(0xFF1A1F2E), // Dark blue-gray for app bars
+        onPrimary: const Color(0xFFFFFFFF),
+        primaryContainer: const Color(0xFF2D2D2D),
+        onPrimaryContainer: const Color(0xFFFFFFFF),
+        secondary: const Color(0xFF757575), // Gray accent
+        onSecondary: const Color(0xFFFFFFFF),
+        secondaryContainer: const Color(0xFF505050),
+        onSecondaryContainer: const Color(0xFFFFFFFF),
+        tertiary: const Color(0xFF909090), // Light gray accent
+        onTertiary: const Color(0xFF000000),
+        tertiaryContainer: const Color(0xFF606060),
+        onTertiaryContainer: const Color(0xFFFFFFFF),
+        surface: const Color(0xFF121212), // Dark surface
+        onSurface: const Color(0xFFFFFFFF),
+        surfaceContainerHighest: const Color(0xFF1E1E1E),
+        onSurfaceVariant: const Color(0xFFB0B0B0),
+        error: const Color(0xFFCF6679),
+        onError: const Color(0xFF000000),
+        errorContainer: const Color(0xFF8A1C3A),
+        onErrorContainer: const Color(0xFFFFFFFF),
+        outline: const Color(0xFF6D6D6D),
+        outlineVariant: const Color(0xFF404040),
+        shadow: const Color(0xFF000000),
+        scrim: const Color(0xFF000000),
+        inverseSurface: const Color(0xFFFFFFFF),
+        onInverseSurface: const Color(0xFF121212),
+        inversePrimary: const Color(0xFF1E1E1E),
+        surfaceTint: const Color(0xFF757575),
+      ),
+      exerciseColors: {
+        'ball_tiptoe': const Color(0xFFB0B0B0), // Light gray
+        'yoga_brick_tiptoe': const Color(0xFF909090), // Medium gray
+        'yoga_brick_ball_pickup': const Color(0xFF707070), // Dark gray
+        'frog_pose': const Color(0xFF505050), // Very dark gray
+        'glute_bridge': const Color(0xFF808080), // Standard gray
+        'stretching': const Color(0xFF606060), // Medium-dark gray
+      },
+    ),
   };
 
   ThemeModel() {
@@ -122,27 +165,33 @@ class ThemeModel extends ChangeNotifier {
     return [
       {
         'theme': ThemeScheme.ocean,
-        'name': '海洋色调',
+        'name': '海洋',
         'primaryColor': const Color(0xFF1565C0),
         'description': '清新的蓝色调，带来海洋般的宁静',
       },
       {
         'theme': ThemeScheme.sunset,
-        'name': '日落色调',
+        'name': '日落',
         'primaryColor': const Color(0xFFE65100),
         'description': '温暖的橙红色调，如同日落时分',
       },
       {
         'theme': ThemeScheme.forest,
-        'name': '森林色调',
+        'name': '森林',
         'primaryColor': const Color(0xFF2E7D32),
         'description': '自然的绿色调，带来森林般的宁静',
       },
       {
         'theme': ThemeScheme.lavender,
-        'name': '薰衣草色调',
+        'name': '薰衣草',
         'primaryColor': const Color(0xFF7B1FA2),
         'description': '浪漫的紫色调，如同薰衣草花田',
+      },
+      {
+        'theme': ThemeScheme.dark,
+        'name': '暗黑',
+        'primaryColor': const Color(0xFF121212),
+        'description': '深邃的暗黑色调，适合夜间使用',
       },
     ];
   }

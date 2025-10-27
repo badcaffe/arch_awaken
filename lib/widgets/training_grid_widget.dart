@@ -197,14 +197,14 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                        color: isToday ? const Color(0xFF00695C) : Colors.black,
+                                        color: isToday ? const Color(0xFF00695C) : Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
                                     Text(
                                       _getMonthAbbreviation(date.month),
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color: isToday ? const Color(0xFF00695C) : Colors.grey,
+                                        color: isToday ? const Color(0xFF00695C) : Theme.of(context).colorScheme.onSurface.withAlpha(153),
                                       ),
                                     ),
                                   ],
@@ -234,8 +234,8 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
                                       bottom: BorderSide(color: Colors.grey.shade300),
                                     ),
                                     color: isCompleted
-                                        ? _getCompletionColor(exercise.color)
-                                        : (isToday ? Colors.grey.shade100 : Colors.white),
+                                        ? Colors.green
+                                        : (isToday ? Colors.white : Colors.grey.shade100),
                                   ),
                                   child: isCompleted
                                       ? Icon(
@@ -267,7 +267,7 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
               Container(
                 width: 16,
                 height: 16,
-                color: Colors.grey.shade300,
+                color: Colors.grey.shade100,
                 margin: const EdgeInsets.only(right: 4),
               ),
               const Text(
@@ -307,8 +307,4 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
     return months[month];
   }
 
-  Color _getCompletionColor(Color baseColor) {
-    // Create a more vibrant version of the base color for completed cells
-    return baseColor.withAlpha(204); // 0.8 opacity equivalent
-  }
 }

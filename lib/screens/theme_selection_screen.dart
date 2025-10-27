@@ -49,13 +49,18 @@ class ThemeSelectionScreen extends StatelessWidget {
                   final description = option['description'] as String;
                   final isSelected = themeModel.currentTheme == theme;
 
+                  // For dark theme, use a contrasting color when selected
+                  final effectiveColor = (theme == ThemeScheme.dark && isSelected)
+                      ? const Color(0xFF757575) // Use gray for contrast when dark theme is selected
+                      : primaryColor;
+
                   return Card(
                     elevation: 0,
-                    color: isSelected ? primaryColor.withOpacity(0.02) : Colors.white,
+                    color: isSelected ? effectiveColor.withAlpha(5) : Theme.of(context).cardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? primaryColor : Colors.grey[200]!,
+                        color: isSelected ? effectiveColor : Theme.of(context).dividerColor,
                         width: isSelected ? 1 : 1,
                       ),
                     ),
@@ -64,7 +69,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: primaryColor,
+                          color: effectiveColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -73,7 +78,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? primaryColor : Colors.black,
+                          color: isSelected ? effectiveColor : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       subtitle: Text(
@@ -86,7 +91,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                       trailing: isSelected
                           ? Icon(
                               Icons.check_circle,
-                              color: primaryColor,
+                              color: effectiveColor,
                               size: 20,
                             )
                           : null,
