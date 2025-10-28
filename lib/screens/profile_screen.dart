@@ -115,7 +115,6 @@ class ProfileScreen extends StatelessWidget {
                     splashColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                   ),
-                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.info),
                     title: const Text('关于应用'),

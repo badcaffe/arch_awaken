@@ -71,7 +71,7 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[50],
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,7 +80,7 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -88,7 +88,7 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
                   '长按并拖动已选项目可以调整顺序',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -111,27 +111,31 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? themeModel.getExerciseColor(exercise.id).withOpacity(0.1)
-                            : Colors.grey[100],
+                            : Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         exercise.icon,
                         color: isSelected
                             ? themeModel.getExerciseColor(exercise.id)
-                            : Colors.grey,
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     title: Text(
                       exercise.name,
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? Colors.black87 : Colors.grey[600],
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     subtitle: Text(
                       exercise.description,
                       style: TextStyle(
-                        color: isSelected ? Colors.grey[600] : Colors.grey[400],
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Theme.of(context).colorScheme.outline,
                       ),
                     ),
                     trailing: Row(
@@ -143,7 +147,7 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
                             padding: const EdgeInsets.only(right: 8.0),
                             child: Icon(
                               Icons.drag_handle,
-                              color: Colors.grey[500],
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         Checkbox(
