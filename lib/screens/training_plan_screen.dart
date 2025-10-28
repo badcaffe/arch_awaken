@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
 import '../models/goal_model.dart';
+import '../models/today_exercises_model.dart';
 
 class TrainingPlanScreen extends StatelessWidget {
   const TrainingPlanScreen({super.key});
@@ -13,18 +14,21 @@ class TrainingPlanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final trainingModel = Provider.of<TrainingModel>(context);
     final goalModel = Provider.of<GoalModel>(context);
+    final todayExercisesModel = Provider.of<TodayExercisesModel>(context);
     final todayRecords = trainingModel.getTodayRecords();
 
-    // Create training plan from actual goals
-    final trainingPlan = goalModel.goals.map((goal) {
-      // Determine target value based on exercise type
-      final exercise = trainingModel.getExerciseById(goal.exerciseId);
+    // Create training plan from selected exercises in order
+    final trainingPlan = todayExercisesModel.selectedExerciseIds.map((exerciseId) {
+      final goal = goalModel.getGoal(exerciseId);
+      final exercise = trainingModel.getExerciseById(exerciseId);
+
+      // Use goal target or default values
       final target = exercise?.type == ExerciseType.timer
-          ? goal.targetSeconds
-          : goal.targetCount;
+          ? (goal?.targetSeconds ?? 30)
+          : (goal?.targetCount ?? 10);
 
       return {
-        'exerciseId': goal.exerciseId,
+        'exerciseId': exerciseId,
         'target': target,
         'completed': false,
       };
@@ -69,6 +73,14 @@ class TrainingPlanScreen extends StatelessWidget {
         title: const Text('今日训练计划'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              context.go('/today-exercises-selection');
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

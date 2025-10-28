@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'models/training_model.dart';
 import 'models/theme_model.dart';
 import 'models/goal_model.dart';
+import 'models/today_exercises_model.dart';
 import 'screens/main_tab_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/training_plan_screen.dart';
@@ -14,6 +15,7 @@ import 'screens/counter_screen.dart';
 import 'screens/theme_selection_screen.dart';
 import 'screens/goal_setting_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/today_exercises_selection_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -76,6 +78,12 @@ class ArchAwakenApp extends StatelessWidget {
                 return const GoalSettingScreen();
               },
             ),
+            GoRoute(
+              path: 'today-exercises-selection',
+              builder: (BuildContext context, GoRouterState state) {
+                return const TodayExercisesSelectionScreen();
+              },
+            ),
           ],
         ),
       ],
@@ -86,6 +94,7 @@ class ArchAwakenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TrainingModel()),
         ChangeNotifierProvider(create: (context) => ThemeModel()),
         ChangeNotifierProvider(create: (context) => GoalModel()),
+        ChangeNotifierProvider(create: (context) => TodayExercisesModel()),
       ],
       child: Consumer<ThemeModel>(
         builder: (context, themeModel, child) {
