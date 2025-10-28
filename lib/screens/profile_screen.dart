@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../models/theme_model.dart';
-import '../models/goal_model.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -83,6 +82,17 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
+                    leading: const Icon(Icons.list),
+                    title: const Text('今日项目'),
+                    subtitle: const Text('选择和排序今日训练项目'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      context.go('/today-exercises-selection');
+                    },
+                    splashColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.flag),
                     title: const Text('训练目标'),
                     subtitle: const Text('设置项目训练目标'),
@@ -93,17 +103,7 @@ class ProfileScreen extends StatelessWidget {
                     splashColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.list),
-                    title: const Text('今日训练项目'),
-                    subtitle: const Text('选择和排序今日训练项目'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      context.go('/today-exercises-selection');
-                    },
-                    splashColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.palette),
                     title: const Text('配色主题'),
@@ -115,45 +115,19 @@ class ProfileScreen extends StatelessWidget {
                     splashColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                   ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: const Text('关于应用'),
+                    subtitle: const Text('查看应用版本信息'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      context.go('/about');
+                    },
+                    splashColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                  ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            // App info section
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        '关于应用',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '足弓觉醒',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '版本 1.0.0',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

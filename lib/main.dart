@@ -14,8 +14,8 @@ import 'screens/timer_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/theme_selection_screen.dart';
 import 'screens/goal_setting_screen.dart';
-import 'screens/profile_screen.dart';
 import 'screens/today_exercises_selection_screen.dart';
+import 'screens/about_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -82,6 +82,12 @@ class ArchAwakenApp extends StatelessWidget {
               path: 'today-exercises-selection',
               builder: (BuildContext context, GoRouterState state) {
                 return const TodayExercisesSelectionScreen();
+              },
+            ),
+            GoRoute(
+              path: 'about',
+              builder: (BuildContext context, GoRouterState state) {
+                return const AboutScreen();
               },
             ),
           ],
