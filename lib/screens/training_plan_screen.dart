@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
+import '../models/goal_model.dart';
 
 class TrainingPlanScreen extends StatelessWidget {
   const TrainingPlanScreen({super.key});
@@ -11,20 +12,26 @@ class TrainingPlanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trainingModel = Provider.of<TrainingModel>(context);
+    final goalModel = Provider.of<GoalModel>(context);
     final todayRecords = trainingModel.getTodayRecords();
 
-    // Create a default training plan
-    final defaultPlan = [
-      {'exerciseId': 'ball_tiptoe', 'target': 20, 'completed': false},
-      {'exerciseId': 'yoga_brick_tiptoe', 'target': 15, 'completed': false},
-      {'exerciseId': 'yoga_brick_ball_pickup', 'target': 15, 'completed': false},
-      {'exerciseId': 'frog_pose', 'target': 60, 'completed': false}, // 60 seconds
-      {'exerciseId': 'glute_bridge', 'target': 15, 'completed': false},
-      {'exerciseId': 'stretching', 'target': 120, 'completed': false}, // 120 seconds
-    ];
+    // Create training plan from actual goals
+    final trainingPlan = goalModel.goals.map((goal) {
+      // Determine target value based on exercise type
+      final exercise = trainingModel.getExerciseById(goal.exerciseId);
+      final target = exercise?.type == ExerciseType.timer
+          ? goal.targetSeconds
+          : goal.targetCount;
+
+      return {
+        'exerciseId': goal.exerciseId,
+        'target': target,
+        'completed': false,
+      };
+    }).toList();
 
     // Update completion status based on today's records
-    for (var planItem in defaultPlan) {
+    for (var planItem in trainingPlan) {
       final exerciseId = planItem['exerciseId'] as String;
       final target = planItem['target'] as int;
       final exerciseRecords = todayRecords
@@ -38,24 +45,24 @@ class TrainingPlanScreen extends StatelessWidget {
             // For timer exercises, check if total duration meets target
             final totalDuration = exerciseRecords
                 .map((record) => record.duration)
-                .reduce((a, b) => a + b);
+                .fold(0, (a, b) => a + b);
             planItem['completed'] = totalDuration >= target;
           } else {
             // For counter exercises, check if total count meets target
             final totalCount = exerciseRecords
                 .map((record) => record.count)
-                .reduce((a, b) => a + b);
+                .fold(0, (a, b) => a + b);
             planItem['completed'] = totalCount >= target;
           }
         }
       }
     }
 
-    final completedCount = defaultPlan
+    final completedCount = trainingPlan
         .where((item) => item['completed'] == true)
         .length;
-    final totalCount = defaultPlan.length;
-    final progress = completedCount / totalCount;
+    final totalCount = trainingPlan.length;
+    final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -111,9 +118,9 @@ class TrainingPlanScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: defaultPlan.length,
+                itemCount: trainingPlan.length,
                 itemBuilder: (context, index) {
-                  final planItem = defaultPlan[index];
+                  final planItem = trainingPlan[index];
                   final exerciseId = planItem['exerciseId'] as String;
                   final target = planItem['target'] as int;
                   final completed = planItem['completed'] as bool;
@@ -153,14 +160,13 @@ class TrainingPlanScreen extends StatelessWidget {
                             : '目标: ${target}次',
                       ),
                       trailing: completed
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                          ? ElevatedButton(
+                              onPressed: null, // Disabled button
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.withAlpha(25),
+                                foregroundColor: Colors.green,
+                                disabledBackgroundColor: Colors.green.withAlpha(25),
+                                disabledForegroundColor: Colors.green,
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -168,14 +174,12 @@ class TrainingPlanScreen extends StatelessWidget {
                                   Icon(
                                     Icons.check,
                                     size: 16,
-                                    color: Colors.green,
                                   ),
                                   SizedBox(width: 4),
                                   Text(
                                     '已完成',
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.green,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],
