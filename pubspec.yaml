@@ -43,6 +43,7 @@ dependencies:
 
   # Local storage for training records
   shared_preferences: ^2.3.2
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,7 @@ flutter:
   assets:
     - assets/logo/arch_awaken_logo.svg
     - assets/logo/arch_awaken_icon.svg
+    - assets/sounds/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

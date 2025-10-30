@@ -1,0 +1,17 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simplified Footprint for Small Icons -->
+  <path d="M512,760 C384,760 280,656 280,528 C280,400 384,296 512,296 C640,296 744,400 744,528 C744,656 640,760 512,760 Z"
+        fill="#00695C" stroke="#4DB6AC" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- Arch Highlight -->
+  <path d="M400,528 C450,432 574,432 624,528"
+        fill="none" stroke="#4DB6AC" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Simple Toe Dots -->
+  <circle cx="440" cy="400" r="32" fill="#4DB6AC"/>
+  <circle cx="512" cy="380" r="28" fill="#4DB6AC"/>
+  <circle cx="584" cy="400" r="32" fill="#4DB6AC"/>
+
+  <!-- Center Sparkle -->
+  <circle cx="512" cy="528" r="16" fill="#FFFFFF" opacity="0.9"/>
+</svg>

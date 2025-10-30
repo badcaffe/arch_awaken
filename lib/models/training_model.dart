@@ -112,6 +112,9 @@ class TrainingModel extends ChangeNotifier {
   List<TrainingRecord> _records = [];
   List<TrainingRecord> get records => _records;
 
+  // Exercise target counts
+  Map<String, int> _exerciseTargets = {};
+
   // Achievement tracking
   Set<String> _unlockedAchievements = {};
   Set<String> get unlockedAchievements => _unlockedAchievements;
@@ -119,6 +122,7 @@ class TrainingModel extends ChangeNotifier {
   TrainingModel() {
     _loadRecords();
     _loadAchievements();
+    _loadExerciseTargets();
   }
 
   List<TrainingExercise> get exercises => _exercises;
@@ -203,6 +207,49 @@ class TrainingModel extends ChangeNotifier {
   Future<void> _saveAchievements() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('achievements', _unlockedAchievements.toList());
+  }
+
+  // Exercise target methods
+  int getExerciseTarget(String exerciseId) {
+    // 如果目标未设置，根据训练类型返回默认值
+    final exercise = getExerciseById(exerciseId);
+    int defaultTarget = 10; // 默认计数器训练目标
+    if (exercise != null && exercise.type == ExerciseType.timer) {
+      defaultTarget = 60; // 计时器训练默认60秒
+    }
+
+    final target = _exerciseTargets[exerciseId] ?? defaultTarget;
+    print('📊 获取训练目标: $exerciseId -> $target (默认: $defaultTarget)');
+    return target;
+  }
+
+  void setExerciseTarget(String exerciseId, int target) {
+    print('🎯 设置训练目标: $exerciseId -> $target');
+    _exerciseTargets[exerciseId] = target;
+    print('📝 当前训练目标: $_exerciseTargets');
+    _saveExerciseTargets();
+    notifyListeners();
+  }
+
+  Future<void> _loadExerciseTargets() async {
+    final prefs = await SharedPreferences.getInstance();
+    final targetsJson = prefs.getString('exercise_targets');
+    print('📥 从存储加载训练目标: $targetsJson');
+    if (targetsJson != null) {
+      final Map<String, dynamic> targetsMap = json.decode(targetsJson);
+      _exerciseTargets = targetsMap.map((key, value) => MapEntry(key, value as int));
+      print('📥 加载训练目标完成: $_exerciseTargets');
+    } else {
+      print('📥 没有找到保存的训练目标，使用默认值');
+    }
+  }
+
+  Future<void> _saveExerciseTargets() async {
+    final prefs = await SharedPreferences.getInstance();
+    final targetsJson = json.encode(_exerciseTargets);
+    print('💾 保存训练目标到存储: $targetsJson');
+    await prefs.setString('exercise_targets', targetsJson);
+    print('✅ 训练目标保存完成');
   }
 
   // Achievement checking methods
