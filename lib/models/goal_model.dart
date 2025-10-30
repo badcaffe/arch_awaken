@@ -5,34 +5,43 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ExerciseGoal {
   final String exerciseId;
   final String exerciseName;
-  int targetCount;
+  int repsPerSet; // 每组次数
   int targetSeconds;
   int restInterval;
   bool hasLeftRight;
   int leftTarget;
   int rightTarget;
+  int sets; // 训练组数
+  int countInterval; // 计数中时长（秒）
+  int prepareInterval; // 准备中时长（秒）
 
   ExerciseGoal({
     required this.exerciseId,
     required this.exerciseName,
-    this.targetCount = 10,
+    this.repsPerSet = 10,
     this.targetSeconds = 30,
     this.restInterval = 10,
     this.hasLeftRight = false,
     this.leftTarget = 10,
     this.rightTarget = 10,
+    this.sets = 3, // 默认3组
+    this.countInterval = 5, // 默认5秒
+    this.prepareInterval = 1, // 默认1秒
   });
 
   Map<String, dynamic> toJson() {
     return {
       'exerciseId': exerciseId,
       'exerciseName': exerciseName,
-      'targetCount': targetCount,
+      'repsPerSet': repsPerSet,
       'targetSeconds': targetSeconds,
       'restInterval': restInterval,
       'hasLeftRight': hasLeftRight,
       'leftTarget': leftTarget,
       'rightTarget': rightTarget,
+      'sets': sets,
+      'countInterval': countInterval,
+      'prepareInterval': prepareInterval,
     };
   }
 
@@ -40,12 +49,15 @@ class ExerciseGoal {
     return ExerciseGoal(
       exerciseId: json['exerciseId'],
       exerciseName: json['exerciseName'],
-      targetCount: json['targetCount'] ?? 10,
+      repsPerSet: json['repsPerSet'] ?? json['targetCount'] ?? 10, // 向后兼容
       targetSeconds: json['targetSeconds'] ?? 30,
       restInterval: json['restInterval'] ?? 10,
       hasLeftRight: json['hasLeftRight'] ?? false,
       leftTarget: json['leftTarget'] ?? 10,
       rightTarget: json['rightTarget'] ?? 10,
+      sets: json['sets'] ?? 3,
+      countInterval: json['countInterval'] ?? 5,
+      prepareInterval: json['prepareInterval'] ?? 1,
     );
   }
 }
@@ -71,10 +83,10 @@ class GoalModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTargetCount(String exerciseId, int count) {
+  void setRepsPerSet(String exerciseId, int count) {
     final goal = _exerciseGoals[exerciseId];
     if (goal != null) {
-      goal.targetCount = count;
+      goal.repsPerSet = count;
       _saveGoals();
       notifyListeners();
     }
@@ -108,6 +120,33 @@ class GoalModel extends ChangeNotifier {
     }
   }
 
+  void setSets(String exerciseId, int sets) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.sets = sets;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
+  void setCountInterval(String exerciseId, int interval) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.countInterval = interval;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
+  void setPrepareInterval(String exerciseId, int interval) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.prepareInterval = interval;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
   Future<void> _loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final goalsJson = prefs.getString(_goalsKey);
@@ -134,52 +173,58 @@ class GoalModel extends ChangeNotifier {
     _exerciseGoals['ball_tiptoe'] = ExerciseGoal(
       exerciseId: 'ball_tiptoe',
       exerciseName: '夹球踮脚',
-      targetCount: 20,
+      repsPerSet: 20,
       targetSeconds: 30,
       restInterval: 10,
+      sets: 3,
     );
 
     _exerciseGoals['yoga_brick_tiptoe'] = ExerciseGoal(
       exerciseId: 'yoga_brick_tiptoe',
       exerciseName: '瑜伽砖踮脚',
-      targetCount: 15,
+      repsPerSet: 15,
       targetSeconds: 30,
       restInterval: 10,
+      sets: 3,
     );
 
     _exerciseGoals['yoga_brick_ball_pickup'] = ExerciseGoal(
       exerciseId: 'yoga_brick_ball_pickup',
       exerciseName: '瑜伽砖捡球',
-      targetCount: 10,
+      repsPerSet: 10,
       targetSeconds: 30,
       restInterval: 10,
       hasLeftRight: true,
       leftTarget: 10,
       rightTarget: 10,
+      sets: 3,
     );
 
     _exerciseGoals['frog_pose'] = ExerciseGoal(
       exerciseId: 'frog_pose',
       exerciseName: '青蛙趴',
-      targetCount: 5,
+      repsPerSet: 5,
       targetSeconds: 60,
       restInterval: 30,
+      sets: 1,
     );
 
     _exerciseGoals['glute_bridge'] = ExerciseGoal(
       exerciseId: 'glute_bridge',
       exerciseName: '臀桥',
-      targetCount: 15,
+      repsPerSet: 15,
       targetSeconds: 30,
       restInterval: 10,
+      sets: 3,
     );
 
     _exerciseGoals['stretching'] = ExerciseGoal(
       exerciseId: 'stretching',
       exerciseName: '拉伸',
-      targetCount: 5,
+      repsPerSet: 5,
       targetSeconds: 60,
       restInterval: 30,
+      sets: 1,
     );
   }
 
@@ -191,12 +236,12 @@ class GoalModel extends ChangeNotifier {
 
   // Calculate total daily goal (sum of all exercise targets)
   int getTotalDailyGoal() {
-    return _exerciseGoals.values.fold(0, (sum, goal) => sum + goal.targetCount);
+    return _exerciseGoals.values.fold(0, (sum, goal) => sum + goal.repsPerSet);
   }
 
   // Check if exercise goal is achieved
   bool isExerciseGoalAchieved(String exerciseId, int completedCount) {
     final goal = _exerciseGoals[exerciseId];
-    return goal != null && completedCount >= goal.targetCount;
+    return goal != null && completedCount >= goal.repsPerSet;
   }
 }

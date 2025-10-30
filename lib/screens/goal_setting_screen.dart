@@ -17,6 +17,9 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
   final Map<String, TextEditingController> _leftTargetControllers = {};
   final Map<String, TextEditingController> _rightTargetControllers = {};
   final Map<String, TextEditingController> _restIntervalControllers = {};
+  final Map<String, TextEditingController> _setsControllers = {};
+  final Map<String, TextEditingController> _countIntervalControllers = {};
+  final Map<String, TextEditingController> _prepareIntervalControllers = {};
 
   @override
   void initState() {
@@ -40,7 +43,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
     // Initialize controllers for all goals
     for (final goal in goals) {
       _targetCountControllers.putIfAbsent(goal.exerciseId,
-          () => TextEditingController(text: goal.targetCount.toString()));
+          () => TextEditingController(text: goal.repsPerSet.toString()));
       _targetSecondsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.targetSeconds.toString()));
       _leftTargetControllers.putIfAbsent(goal.exerciseId,
@@ -49,6 +52,12 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           () => TextEditingController(text: goal.rightTarget.toString()));
       _restIntervalControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.restInterval.toString()));
+      _setsControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.sets.toString()));
+      _countIntervalControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.countInterval.toString()));
+      _prepareIntervalControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.prepareInterval.toString()));
     }
   }
 
@@ -69,6 +78,15 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       controller.dispose();
     }
     for (final controller in _restIntervalControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _setsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _countIntervalControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _prepareIntervalControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -176,7 +194,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
         ),
         const SizedBox(height: 16),
 
-        // Target Count
+        // Reps Per Set
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -184,7 +202,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '目标次数',
+                  '每组次数',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -202,14 +220,56 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
                 TextField(
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: '目标次数',
+                    labelText: '每组次数',
                     border: OutlineInputBorder(),
                     suffixText: '次',
                   ),
                   controller: _targetCountControllers[goal.exerciseId],
                   onChanged: (value) {
-                    final count = int.tryParse(value) ?? goal.targetCount;
-                    goalModel.setTargetCount(goal.exerciseId, count);
+                    final count = int.tryParse(value) ?? goal.repsPerSet;
+                    goalModel.setRepsPerSet(goal.exerciseId, count);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Training Sets
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '训练组数',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '每次训练要完成的组数',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '训练组数',
+                    border: OutlineInputBorder(),
+                    suffixText: '组',
+                  ),
+                  controller: _setsControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final sets = int.tryParse(value) ?? goal.sets;
+                    goalModel.setSets(goal.exerciseId, sets);
                   },
                 ),
               ],
@@ -360,6 +420,90 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
                   onChanged: (value) {
                     final interval = int.tryParse(value) ?? goal.restInterval;
                     goalModel.setRestInterval(goal.exerciseId, interval);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Count Interval (计数中)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '计数中时长',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '每次计数阶段的时间长度',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '计数中时长',
+                    border: OutlineInputBorder(),
+                    suffixText: '秒',
+                  ),
+                  controller: _countIntervalControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final interval = int.tryParse(value) ?? goal.countInterval;
+                    goalModel.setCountInterval(goal.exerciseId, interval);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Prepare Interval (准备中)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '准备中时长',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '每次准备阶段的时间长度',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '准备中时长',
+                    border: OutlineInputBorder(),
+                    suffixText: '秒',
+                  ),
+                  controller: _prepareIntervalControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final interval = int.tryParse(value) ?? goal.prepareInterval;
+                    goalModel.setPrepareInterval(goal.exerciseId, interval);
                   },
                 ),
               ],

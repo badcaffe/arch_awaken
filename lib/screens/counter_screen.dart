@@ -25,18 +25,26 @@ class _CounterScreenState extends State<CounterScreen> {
   bool _isRunning = false;
   bool _isCountingDown = false;
   bool _isPreparing = false;
+  bool _isResting = false;
   int _countdownValue = 5;
   int _currentPhaseValue = 1;
   Timer? _countdownTimer;
   Timer? _autoCounterTimer;
   Timer? _trainingTimer;
+  Timer? _restTimer;
   int _trainingDuration = 0;
   final SoundService _soundService = SoundService();
 
   // 可配置参数
   int _countInterval = 5; // 计数间隔（秒）
   int _prepareInterval = 1;  // 准备间隔（秒）
-  int _currentTargetCount = 10; // 当前训练的目标次数
+
+  // 分组训练参数
+  int _currentSet = 1; // 当前组数
+  int _totalSets = 3; // 总组数
+  int _repsPerSet = 10; // 每组次数
+  int _restBetweenSets = 30; // 组间休息时长（秒）
+  int _currentRep = 0; // 当前组内计数
 
   // 训练模型引用
   late TrainingModel _trainingModel;
@@ -47,7 +55,10 @@ class _CounterScreenState extends State<CounterScreen> {
     _trainingModel = Provider.of<TrainingModel>(context, listen: false);
     final goalModel = Provider.of<GoalModel>(context, listen: false);
     final goal = goalModel.getGoal(widget.exerciseId);
-    _currentTargetCount = goal?.targetCount ?? 10;
+    _repsPerSet = goal?.repsPerSet ?? 10;
+    _totalSets = goal?.sets ?? 3;
+    _countInterval = goal?.countInterval ?? 5;
+    _prepareInterval = goal?.prepareInterval ?? 1;
   }
 
   @override
@@ -62,15 +73,24 @@ class _CounterScreenState extends State<CounterScreen> {
   void _startTraining() {
     final goalModel = Provider.of<GoalModel>(context, listen: false);
     final goal = goalModel.getGoal(widget.exerciseId);
-    final target = goal?.targetCount ?? 10;
+    final target = goal?.repsPerSet ?? 10;
+    final sets = goal?.sets ?? 3;
+    final countInterval = goal?.countInterval ?? 5;
+    final prepareInterval = goal?.prepareInterval ?? 1;
 
-    print('🚀 开始训练: ${widget.exerciseId}, 目标次数: $target');
+    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: ${countInterval}秒, 准备中: ${prepareInterval}秒');
 
     setState(() {
       _isRunning = true;
       _isCountingDown = true;
       _countdownValue = 5;
-      _currentTargetCount = target;
+      _currentSet = 1;
+      _currentRep = 0;
+      _count = 0;
+      _repsPerSet = target;
+      _totalSets = sets;
+      _countInterval = countInterval;
+      _prepareInterval = prepareInterval;
     });
 
     _startCountdown();
@@ -79,15 +99,16 @@ class _CounterScreenState extends State<CounterScreen> {
   void _startCountdown() {
     // 播放倒计时开始的声音
     _soundService.playCountdownSound();
-    // 立即播放第一个倒计时数字（5）
-    _soundService.playNumberSound(_countdownValue);
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         if (_countdownValue > 1) {
           _countdownValue--;
-          // 播放倒计时的数字声音
-          _soundService.playNumberSound(_countdownValue);
+          _soundService.playCountdownSound();
         } else {
           _isCountingDown = false;
           _countdownValue = 5;
@@ -102,38 +123,70 @@ class _CounterScreenState extends State<CounterScreen> {
   void _startAutoCounter() {
     _currentPhaseValue = 1;
     _isPreparing = false;
+    _isResting = false;
 
     // 立即播放第一个数字1
     _soundService.playNumberSound(_currentPhaseValue);
 
     _autoCounterTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
-        if (!_isPreparing) {
+        if (_isResting) {
+          // 准备休息阶段
+          if (_countdownValue > 1) {
+            _countdownValue--;
+          } else {
+            // 休息结束，开始下一组
+            _isResting = false;
+            _isCountingDown = true;
+            _countdownValue = 5;
+            _startCountdown();
+            timer.cancel();
+          }
+        } else if (!_isPreparing) {
           // 计数阶段
           if (_currentPhaseValue < _countInterval) {
             _currentPhaseValue++;
             // 播放数字声音 (1-2-3-4-5)
             _soundService.playNumberSound(_currentPhaseValue);
           } else {
-            // 完成一次计数，进入准备阶段
+            // 完成一次计数
             _count++;
+            _currentRep++;
             _currentPhaseValue = 1;
             _isPreparing = true;
+            // 进入准备阶段时立即播放gudu声音
+            _soundService.playGuduSound();
 
-            // 检查是否达到目标计次
-            final goalModel = Provider.of<GoalModel>(context, listen: false);
-            final goal = goalModel.getGoal(widget.exerciseId);
-            final currentTarget = goal?.targetCount ?? 10;
-            if (_count >= currentTarget) {
-              print('🎯 达到目标: $_count >= $currentTarget, 自动结束训练');
-              _pauseTraining();
-              _completeTraining();
+            // 检查是否完成当前组
+            if (_currentRep >= _repsPerSet) {
+              // 完成当前组
+              _currentRep = 0;
+
+              // 检查是否完成所有组
+              if (_currentSet >= _totalSets) {
+                // 完成所有训练
+                print('🎯 完成所有训练: $_totalSets 组, 每组 $_repsPerSet 次');
+                _pauseTraining();
+                _completeTraining();
+              } else {
+                // 进入组间休息
+                _currentSet++;
+                _isResting = true;
+                _countdownValue = _restBetweenSets;
+                _soundService.playCountdownSound();
+              }
             }
           }
         } else {
           // 准备阶段
           if (_currentPhaseValue < _prepareInterval) {
             _currentPhaseValue++;
+            // 播放咕嘟声音（准备中每秒计时）
+            _soundService.playGuduSound();
           } else {
             // 准备结束，开始新一轮计数
             _currentPhaseValue = 1;
@@ -148,6 +201,10 @@ class _CounterScreenState extends State<CounterScreen> {
 
   void _startTrainingTimer() {
     _trainingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         _trainingDuration++;
       });
@@ -161,6 +218,7 @@ class _CounterScreenState extends State<CounterScreen> {
     _countdownTimer?.cancel();
     _autoCounterTimer?.cancel();
     _trainingTimer?.cancel();
+    _restTimer?.cancel();
     _soundService.stopAllSounds();
   }
 
@@ -178,13 +236,17 @@ class _CounterScreenState extends State<CounterScreen> {
       _isRunning = false;
       _isCountingDown = false;
       _isPreparing = false;
+      _isResting = false;
       _countdownValue = 5;
       _currentPhaseValue = 1;
       _trainingDuration = 0;
+      _currentSet = 1;
+      _currentRep = 0;
     });
     _countdownTimer?.cancel();
     _autoCounterTimer?.cancel();
     _trainingTimer?.cancel();
+    _restTimer?.cancel();
     _soundService.stopAllSounds();
   }
 
@@ -234,10 +296,10 @@ class _CounterScreenState extends State<CounterScreen> {
                     const Text('计数间隔:'),
                     const SizedBox(width: 16),
                     DropdownButton<int>(
-                      value: _countInterval,
+                      value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.countInterval ?? 5,
                       onChanged: _isRunning ? null : (value) {
                         setDialogState(() {
-                          _countInterval = value!;
+                          Provider.of<GoalModel>(context, listen: false).setCountInterval(widget.exerciseId, value!);
                         });
                       },
                       items: [3, 4, 5, 6, 7, 8, 9, 10].map((value) {
@@ -255,10 +317,10 @@ class _CounterScreenState extends State<CounterScreen> {
                     const Text('准备间隔:'),
                     const SizedBox(width: 16),
                     DropdownButton<int>(
-                      value: _prepareInterval,
+                      value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.prepareInterval ?? 1,
                       onChanged: _isRunning ? null : (value) {
                         setDialogState(() {
-                          _prepareInterval = value!;
+                          Provider.of<GoalModel>(context, listen: false).setPrepareInterval(widget.exerciseId, value!);
                         });
                       },
                       items: [1, 2, 3, 4, 5].map((value) {
@@ -273,19 +335,61 @@ class _CounterScreenState extends State<CounterScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('目标计次:'),
+                    const Text('每组次数:'),
                     const SizedBox(width: 16),
                     DropdownButton<int>(
-                      value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.targetCount ?? 10,
+                      value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.repsPerSet ?? 10,
                       onChanged: _isRunning ? null : (value) {
                         setDialogState(() {
-                          Provider.of<GoalModel>(context, listen: false).setTargetCount(widget.exerciseId, value!);
+                          Provider.of<GoalModel>(context, listen: false).setRepsPerSet(widget.exerciseId, value!);
                         });
                       },
                       items: [5, 10, 15, 20, 25, 30, 40, 50].map((value) {
                         return DropdownMenuItem<int>(
                           value: value,
                           child: Text('$value 次'),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text('训练组数:'),
+                    const SizedBox(width: 16),
+                    DropdownButton<int>(
+                      value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.sets ?? 3,
+                      onChanged: _isRunning ? null : (value) {
+                        setDialogState(() {
+                          Provider.of<GoalModel>(context, listen: false).setSets(widget.exerciseId, value!);
+                        });
+                      },
+                      items: [1, 2, 3, 4, 5, 6, 8, 10].map((value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value 组'),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text('组间休息:'),
+                    const SizedBox(width: 16),
+                    DropdownButton<int>(
+                      value: _restBetweenSets,
+                      onChanged: _isRunning ? null : (value) {
+                        setDialogState(() {
+                          _restBetweenSets = value!;
+                        });
+                      },
+                      items: [10, 15, 20, 30, 45, 60, 90, 120].map((value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value 秒'),
                         );
                       }).toList(),
                     ),
@@ -308,7 +412,9 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String _getPhaseText() {
-    if (_isCountingDown) {
+    if (_isResting) {
+      return '组间休息';
+    } else if (_isCountingDown) {
       return '准备开始';
     } else if (_isPreparing) {
       return '准备中';
@@ -318,7 +424,9 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String _getPhaseDescription() {
-    if (_isCountingDown) {
+    if (_isResting) {
+      return '第 $_currentSet 组休息 $_countdownValue 秒';
+    } else if (_isCountingDown) {
       return '$_countdownValue 秒后开始自动计数';
     } else if (_isPreparing) {
       return '准备 $_currentPhaseValue/$_prepareInterval 秒';
@@ -331,7 +439,6 @@ class _CounterScreenState extends State<CounterScreen> {
   Widget build(BuildContext context) {
     final trainingModel = Provider.of<TrainingModel>(context);
     final themeModel = Provider.of<ThemeModel>(context);
-    final goalModel = Provider.of<GoalModel>(context);
     final baseExercise = trainingModel.getExerciseById(widget.exerciseId);
 
     if (baseExercise == null) {
@@ -356,7 +463,9 @@ class _CounterScreenState extends State<CounterScreen> {
     );
 
     Color displayColor;
-    if (_isCountingDown) {
+    if (_isResting) {
+      displayColor = Colors.blue;
+    } else if (_isCountingDown) {
       displayColor = const Color(0xFF00695C);
     } else if (_isPreparing) {
       displayColor = Colors.orange;
@@ -365,7 +474,9 @@ class _CounterScreenState extends State<CounterScreen> {
     }
 
     int displayValue;
-    if (_isCountingDown) {
+    if (_isResting) {
+      displayValue = _countdownValue;
+    } else if (_isCountingDown) {
       displayValue = _countdownValue;
     } else {
       displayValue = _currentPhaseValue;
@@ -441,9 +552,18 @@ class _CounterScreenState extends State<CounterScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '已完成: $_count/$_currentTargetCount 次',
+                    '第$_currentSet/$_totalSets组: 第$_currentRep/$_repsPerSet次',
                     style: TextStyle(
                       fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: displayColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '总完成: $_count 次',
+                    style: TextStyle(
+                      fontSize: 16,
                       color: Colors.grey[600],
                     ),
                   ),

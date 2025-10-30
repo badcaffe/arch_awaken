@@ -25,7 +25,7 @@ class TrainingPlanScreen extends StatelessWidget {
       // Use goal target or default values
       final target = exercise?.type == ExerciseType.timer
           ? (goal?.targetSeconds ?? 30)
-          : (goal?.targetCount ?? 10);
+          : (goal?.repsPerSet ?? 10);
 
       return {
         'exerciseId': exerciseId,
@@ -137,9 +137,15 @@ class TrainingPlanScreen extends StatelessWidget {
                   final target = planItem['target'] as int;
                   final completed = planItem['completed'] as bool;
                   final themeModel = Provider.of<ThemeModel>(context);
+                  final goalModel = Provider.of<GoalModel>(context);
                   final baseExercise = trainingModel.getExerciseById(exerciseId);
 
                   if (baseExercise == null) return const SizedBox.shrink();
+
+                  // Get goal information for sets
+                  final goal = goalModel.getGoal(exerciseId);
+                  final sets = goal?.sets ?? 3;
+                  final totalCount = baseExercise.type == ExerciseType.timer ? target : target * sets;
 
                   // Create exercise with theme color
                   final exercise = TrainingExercise(
@@ -168,8 +174,8 @@ class TrainingPlanScreen extends StatelessWidget {
                       title: Text(exercise.name),
                       subtitle: Text(
                         exercise.type == ExerciseType.timer
-                            ? '目标: ${target}秒'
-                            : '目标: ${target}次',
+                            ? '目标: $target秒'
+                            : '目标: $target次 × $sets组',
                       ),
                       trailing: completed
                           ? ElevatedButton(
@@ -185,13 +191,13 @@ class TrainingPlanScreen extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.check,
-                                    size: 16,
+                                    size: 20,
                                   ),
-                                  SizedBox(width: 4),
+                                  SizedBox(width: 6),
                                   Text(
                                     '已完成',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ],
@@ -209,7 +215,10 @@ class TrainingPlanScreen extends StatelessWidget {
                                 backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
                               ),
-                              child: const Text('开始训练'),
+                              child: const Text(
+                                '开始训练',
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
                     ),
                   );
