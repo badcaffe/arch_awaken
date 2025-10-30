@@ -37,7 +37,7 @@ class _CounterScreenState extends State<CounterScreen> {
 
   // 可配置参数
   int _countInterval = 5; // 计数间隔（秒）
-  int _prepareInterval = 1;  // 准备间隔（秒）
+  int _prepareInterval = 1;  // 缓冲间隔（秒）
 
   // 分组训练参数
   int _currentSet = 1; // 当前组数
@@ -78,7 +78,7 @@ class _CounterScreenState extends State<CounterScreen> {
     final countInterval = goal?.countInterval ?? 5;
     final prepareInterval = goal?.prepareInterval ?? 1;
 
-    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: ${countInterval}秒, 准备中: ${prepareInterval}秒');
+    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: ${countInterval}秒, 缓冲中: ${prepareInterval}秒');
 
     setState(() {
       _isRunning = true;
@@ -153,13 +153,26 @@ class _CounterScreenState extends State<CounterScreen> {
             // 播放数字声音 (1-2-3-4-5)
             _soundService.playNumberSound(_currentPhaseValue);
           } else {
-            // 完成一次计数
+            // 计数阶段结束，进入缓冲阶段
+            _currentPhaseValue = 1;
+            _isPreparing = true;
+            // 进入缓冲阶段时立即播放gudu声音
+            _soundService.playGuduSound();
+          }
+        } else {
+          // 缓冲阶段
+          if (_currentPhaseValue < _prepareInterval) {
+            _currentPhaseValue++;
+            // 播放咕嘟声音（缓冲中每秒计时）
+            _soundService.playGuduSound();
+          } else {
+            // 缓冲结束，完成一次训练
             _count++;
             _currentRep++;
             _currentPhaseValue = 1;
-            _isPreparing = true;
-            // 进入准备阶段时立即播放gudu声音
-            _soundService.playGuduSound();
+            _isPreparing = false;
+            // 开始新一轮计数时立即播放数字1
+            _soundService.playNumberSound(_currentPhaseValue);
 
             // 检查是否完成当前组
             if (_currentRep >= _repsPerSet) {
@@ -180,19 +193,6 @@ class _CounterScreenState extends State<CounterScreen> {
                 _soundService.playCountdownSound();
               }
             }
-          }
-        } else {
-          // 准备阶段
-          if (_currentPhaseValue < _prepareInterval) {
-            _currentPhaseValue++;
-            // 播放咕嘟声音（准备中每秒计时）
-            _soundService.playGuduSound();
-          } else {
-            // 准备结束，开始新一轮计数
-            _currentPhaseValue = 1;
-            _isPreparing = false;
-            // 开始新一轮计数时立即播放数字1
-            _soundService.playNumberSound(_currentPhaseValue);
           }
         }
       });
@@ -314,7 +314,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('准备间隔:'),
+                    const Text('缓冲间隔:'),
                     const SizedBox(width: 16),
                     DropdownButton<int>(
                       value: Provider.of<GoalModel>(context, listen: false).getGoal(widget.exerciseId)?.prepareInterval ?? 1,
@@ -417,7 +417,7 @@ class _CounterScreenState extends State<CounterScreen> {
     } else if (_isCountingDown) {
       return '准备开始';
     } else if (_isPreparing) {
-      return '准备中';
+      return '缓冲中';
     } else {
       return '计数中';
     }
@@ -429,7 +429,7 @@ class _CounterScreenState extends State<CounterScreen> {
     } else if (_isCountingDown) {
       return '$_countdownValue 秒后开始自动计数';
     } else if (_isPreparing) {
-      return '准备 $_currentPhaseValue/$_prepareInterval 秒';
+      return '缓冲 $_currentPhaseValue/$_prepareInterval 秒';
     } else {
       return '计数 $_currentPhaseValue/$_countInterval 秒';
     }
@@ -468,7 +468,7 @@ class _CounterScreenState extends State<CounterScreen> {
     } else if (_isCountingDown) {
       displayColor = const Color(0xFF00695C);
     } else if (_isPreparing) {
-      displayColor = Colors.orange;
+      displayColor = const Color(0xFFEBA236);
     } else {
       displayColor = exercise.color;
     }

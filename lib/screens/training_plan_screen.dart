@@ -175,7 +175,7 @@ class TrainingPlanScreen extends StatelessWidget {
                       subtitle: Text(
                         exercise.type == ExerciseType.timer
                             ? '目标: $target秒'
-                            : '目标: $target次 × $sets组',
+                            : '目标: $target次 × $sets',
                       ),
                       trailing: completed
                           ? ElevatedButton(
