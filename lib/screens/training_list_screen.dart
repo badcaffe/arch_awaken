@@ -44,11 +44,7 @@ class TrainingListScreen extends StatelessWidget {
       elevation: 4,
       child: InkWell(
         onTap: () {
-          if (exercise.type == ExerciseType.timer) {
-            context.go('/timer/${exercise.id}');
-          } else {
-            context.go('/counter/${exercise.id}');
-          }
+          context.go('/training-introduction/${exercise.id}');
         },
         borderRadius: BorderRadius.circular(12),
         splashColor: Colors.transparent,
@@ -62,7 +58,7 @@ class TrainingListScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: exercise.color.withOpacity(0.1),
+                  color: exercise.color.withAlpha(25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -87,8 +83,8 @@ class TrainingListScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: exercise.type == ExerciseType.timer
-                      ? Colors.blue.withOpacity(0.1)
-                      : Colors.green.withOpacity(0.1),
+                      ? Colors.blue.withAlpha(25)
+                      : Colors.green.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
