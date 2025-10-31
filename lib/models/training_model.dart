@@ -60,6 +60,14 @@ class TrainingRecord {
 class TrainingModel extends ChangeNotifier {
   static const List<TrainingExercise> _exercises = [
     TrainingExercise(
+      id: 'foot_ball_rolling',
+      name: '脚底滚球',
+      description: '',
+      type: ExerciseType.timer,
+      icon: Icons.sports_baseball,
+      color: Colors.grey, // Will be overridden by theme
+    ),
+    TrainingExercise(
       id: 'ball_tiptoe',
       name: '夹球踮脚',
       description: '',
@@ -105,14 +113,6 @@ class TrainingModel extends ChangeNotifier {
       description: '',
       type: ExerciseType.timer,
       icon: Icons.self_improvement,
-      color: Colors.grey, // Will be overridden by theme
-    ),
-    TrainingExercise(
-      id: 'foot_ball_rolling',
-      name: '脚底滚球',
-      description: '',
-      type: ExerciseType.timer,
-      icon: Icons.sports_baseball,
       color: Colors.grey, // Will be overridden by theme
     ),
   ];

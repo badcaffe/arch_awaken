@@ -132,7 +132,7 @@ class TrainingRecordsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 315, // Fixed height for the grid (7 rows of 40px + legend)
+            height: 355, // Fixed height for the grid (7 rows of 40px + legend)
             child: TrainingGridWidget(daysToShow: 30),
           ),
           const SizedBox(height: 20),

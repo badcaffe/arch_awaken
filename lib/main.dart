@@ -18,6 +18,7 @@ import 'screens/today_exercises_selection_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/training_introduction_screen.dart';
 import 'screens/foot_ball_rolling_screen.dart';
+import 'screens/group_timer_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -28,7 +29,7 @@ class ArchAwakenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GoRouter _router = GoRouter(
+    final GoRouter router = GoRouter(
       routes: <RouteBase>[
         GoRoute(
           path: '/',
@@ -73,6 +74,13 @@ class ArchAwakenApp extends StatelessWidget {
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
                 return CounterScreen(exerciseId: exerciseId);
+              },
+            ),
+            GoRoute(
+              path: 'group-timer/:exerciseId',
+              builder: (BuildContext context, GoRouterState state) {
+                final exerciseId = state.pathParameters['exerciseId']!;
+                return GroupTimerScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(
@@ -129,7 +137,7 @@ class ArchAwakenApp extends StatelessWidget {
               highlightColor: Colors.transparent,
               hoverColor: Colors.transparent,
             ),
-            routerConfig: _router,
+            routerConfig: router,
           );
         },
       ),

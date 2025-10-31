@@ -14,6 +14,9 @@ class ExerciseGoal {
   int sets; // 训练组数
   int countInterval; // 计数中时长（秒）
   int prepareInterval; // 准备中时长（秒）
+  int leftRightSeconds; // 左右滚动时长（秒）
+  int frontBackSeconds; // 前后滚动时长（秒）
+  int heelSeconds; // 脚后跟滚动时长（秒）
 
   ExerciseGoal({
     required this.exerciseId,
@@ -27,6 +30,9 @@ class ExerciseGoal {
     this.sets = 3, // 默认3组
     this.countInterval = 5, // 默认5秒
     this.prepareInterval = 1, // 默认1秒
+    this.leftRightSeconds = 60, // 默认60秒
+    this.frontBackSeconds = 60, // 默认60秒
+    this.heelSeconds = 60, // 默认60秒
   });
 
   Map<String, dynamic> toJson() {
@@ -42,6 +48,9 @@ class ExerciseGoal {
       'sets': sets,
       'countInterval': countInterval,
       'prepareInterval': prepareInterval,
+      'leftRightSeconds': leftRightSeconds,
+      'frontBackSeconds': frontBackSeconds,
+      'heelSeconds': heelSeconds,
     };
   }
 
@@ -58,6 +67,9 @@ class ExerciseGoal {
       sets: json['sets'] ?? 3,
       countInterval: json['countInterval'] ?? 5,
       prepareInterval: json['prepareInterval'] ?? 1,
+      leftRightSeconds: json['leftRightSeconds'] ?? 60,
+      frontBackSeconds: json['frontBackSeconds'] ?? 60,
+      heelSeconds: json['heelSeconds'] ?? 60,
     );
   }
 }
@@ -147,6 +159,17 @@ class GoalModel extends ChangeNotifier {
     }
   }
 
+  void setRollingTypeDurations(String exerciseId, int leftRightSeconds, int frontBackSeconds, int heelSeconds) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.leftRightSeconds = leftRightSeconds;
+      goal.frontBackSeconds = frontBackSeconds;
+      goal.heelSeconds = heelSeconds;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
   Future<void> _loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final goalsJson = prefs.getString(_goalsKey);
@@ -157,6 +180,24 @@ class GoalModel extends ChangeNotifier {
         for (final goalData in goalsList) {
           final goal = ExerciseGoal.fromJson(Map<String, dynamic>.from(goalData));
           _exerciseGoals[goal.exerciseId] = goal;
+        }
+        // Ensure foot_ball_rolling goal exists (migration for existing users)
+        if (!_exerciseGoals.containsKey('foot_ball_rolling')) {
+          _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
+            exerciseId: 'foot_ball_rolling',
+            exerciseName: '脚底滚球',
+            repsPerSet: 10,
+            targetSeconds: 60,
+            restInterval: 10,
+            sets: 1,
+            hasLeftRight: true,
+            leftTarget: 60,
+            rightTarget: 60,
+            leftRightSeconds: 60,
+            frontBackSeconds: 60,
+            heelSeconds: 60,
+          );
+          _saveGoals();
         }
       } catch (e) {
         // If parsing fails, initialize with default goals
@@ -170,6 +211,21 @@ class GoalModel extends ChangeNotifier {
 
   void _initializeDefaultGoals() {
     // Initialize with default goals for all exercises
+    _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
+      exerciseId: 'foot_ball_rolling',
+      exerciseName: '脚底滚球',
+      repsPerSet: 10,
+      targetSeconds: 60, // 默认60秒
+      restInterval: 10,
+      sets: 1,
+      hasLeftRight: true, // 区分左右脚
+      leftTarget: 60, // 左脚目标60秒
+      rightTarget: 60, // 右脚目标60秒
+      leftRightSeconds: 60, // 左右滚动默认60秒
+      frontBackSeconds: 60, // 前后滚动默认60秒
+      heelSeconds: 60, // 脚后跟滚动默认60秒
+    );
+
     _exerciseGoals['ball_tiptoe'] = ExerciseGoal(
       exerciseId: 'ball_tiptoe',
       exerciseName: '夹球踮脚',
@@ -225,18 +281,6 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 60,
       restInterval: 30,
       sets: 1,
-    );
-
-    _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
-      exerciseId: 'foot_ball_rolling',
-      exerciseName: '脚底滚球',
-      repsPerSet: 10,
-      targetSeconds: 60, // 默认60秒
-      restInterval: 10,
-      sets: 1,
-      hasLeftRight: true, // 区分左右脚
-      leftTarget: 60, // 左脚目标60秒
-      rightTarget: 60, // 右脚目标60秒
     );
   }
 

@@ -70,13 +70,13 @@ class TodayExercisesModel extends ChangeNotifier {
   void _initializeDefaultSelection() {
     // Select all exercises by default
     _selectedExerciseIds = [
+      'foot_ball_rolling',
       'ball_tiptoe',
       'yoga_brick_tiptoe',
       'yoga_brick_ball_pickup',
       'frog_pose',
       'glute_bridge',
       'stretching',
-      'foot_ball_rolling',
     ];
   }
 

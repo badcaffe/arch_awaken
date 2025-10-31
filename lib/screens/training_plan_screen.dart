@@ -163,7 +163,7 @@ class TrainingPlanScreen extends StatelessWidget {
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: exercise.color.withOpacity(0.1),
+                          color: exercise.color.withAlpha(25),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -183,7 +183,12 @@ class TrainingPlanScreen extends StatelessWidget {
                                 if (exerciseId == 'foot_ball_rolling') {
                                   context.go('/foot-ball-rolling/$exerciseId');
                                 } else if (exercise.type == ExerciseType.timer) {
-                                  context.go('/timer/$exerciseId');
+                                  // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+                                  if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
+                                    context.go('/group-timer/$exerciseId');
+                                  } else {
+                                    context.go('/timer/$exerciseId');
+                                  }
                                 } else {
                                   context.go('/counter/$exerciseId');
                                 }
@@ -202,7 +207,12 @@ class TrainingPlanScreen extends StatelessWidget {
                                 if (exerciseId == 'foot_ball_rolling') {
                                   context.go('/foot-ball-rolling/$exerciseId');
                                 } else if (exercise.type == ExerciseType.timer) {
-                                  context.go('/timer/$exerciseId');
+                                  // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+                                  if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
+                                    context.go('/group-timer/$exerciseId');
+                                  } else {
+                                    context.go('/timer/$exerciseId');
+                                  }
                                 } else {
                                   context.go('/counter/$exerciseId');
                                 }

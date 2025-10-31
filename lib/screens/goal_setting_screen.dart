@@ -20,6 +20,9 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
   final Map<String, TextEditingController> _setsControllers = {};
   final Map<String, TextEditingController> _countIntervalControllers = {};
   final Map<String, TextEditingController> _prepareIntervalControllers = {};
+  final Map<String, TextEditingController> _leftRightSecondsControllers = {};
+  final Map<String, TextEditingController> _frontBackSecondsControllers = {};
+  final Map<String, TextEditingController> _heelSecondsControllers = {};
 
   @override
   void initState() {
@@ -58,6 +61,12 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           () => TextEditingController(text: goal.countInterval.toString()));
       _prepareIntervalControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.prepareInterval.toString()));
+      _leftRightSecondsControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.leftRightSeconds.toString()));
+      _frontBackSecondsControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.frontBackSeconds.toString()));
+      _heelSecondsControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.heelSeconds.toString()));
     }
   }
 
@@ -87,6 +96,15 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       controller.dispose();
     }
     for (final controller in _prepareIntervalControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _leftRightSecondsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _frontBackSecondsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _heelSecondsControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -132,6 +150,11 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
 
   Widget _buildExerciseGoalSettings(ExerciseGoal goal) {
     final goalModel = Provider.of<GoalModel>(context);
+
+    // Special case for foot_ball_rolling - only show rolling type durations
+    if (goal.exerciseId == 'foot_ball_rolling') {
+      return _buildFootBallRollingSettings(goal, goalModel);
+    }
 
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -386,6 +409,87 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           ),
         if (goal.hasLeftRight) const SizedBox(height: 16),
 
+        // Rolling Type Durations (for foot_ball_rolling)
+        if (goal.exerciseId == 'foot_ball_rolling')
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '滚动类型时长设置',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '分别设置不同滚动类型的训练时长',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Left/Right Rolling
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: '左右滚动时长',
+                            border: OutlineInputBorder(),
+                            suffixText: '秒',
+                          ),
+                          controller: _leftRightSecondsControllers[goal.exerciseId],
+                          onChanged: (value) {
+                            final leftRightSeconds = int.tryParse(value) ?? goal.leftRightSeconds;
+                            goalModel.setRollingTypeDurations(goal.exerciseId, leftRightSeconds, goal.frontBackSeconds, goal.heelSeconds);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: '前后滚动时长',
+                            border: OutlineInputBorder(),
+                            suffixText: '秒',
+                          ),
+                          controller: _frontBackSecondsControllers[goal.exerciseId],
+                          onChanged: (value) {
+                            final frontBackSeconds = int.tryParse(value) ?? goal.frontBackSeconds;
+                            goalModel.setRollingTypeDurations(goal.exerciseId, goal.leftRightSeconds, frontBackSeconds, goal.heelSeconds);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Heel Rolling
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '脚后跟滚动时长',
+                      border: OutlineInputBorder(),
+                      suffixText: '秒',
+                    ),
+                    controller: _heelSecondsControllers[goal.exerciseId],
+                    onChanged: (value) {
+                      final heelSeconds = int.tryParse(value) ?? goal.heelSeconds;
+                      goalModel.setRollingTypeDurations(goal.exerciseId, goal.leftRightSeconds, goal.frontBackSeconds, heelSeconds);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (goal.exerciseId == 'foot_ball_rolling') const SizedBox(height: 16),
+
         // Rest Interval
         Card(
           child: Padding(
@@ -550,5 +654,149 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       default:
         return '目标次数';
     }
+  }
+
+  Widget _buildFootBallRollingSettings(ExerciseGoal goal, GoalModel goalModel) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Exercise Header
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  goal.exerciseName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '使用小球进行脚底滚动训练，增强足底感知和灵活性',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Save Button
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('目标设置已保存')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  '保存目标设置',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Rolling Type Durations
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '滚动类型时长设置',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '分别设置不同滚动类型的训练时长',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Left/Right Rolling
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: '左右滚动时长',
+                          border: OutlineInputBorder(),
+                          suffixText: '秒',
+                        ),
+                        controller: _leftRightSecondsControllers[goal.exerciseId],
+                        onChanged: (value) {
+                          final leftRightSeconds = int.tryParse(value) ?? goal.leftRightSeconds;
+                          goalModel.setRollingTypeDurations(goal.exerciseId, leftRightSeconds, goal.frontBackSeconds, goal.heelSeconds);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: '前后滚动时长',
+                          border: OutlineInputBorder(),
+                          suffixText: '秒',
+                        ),
+                        controller: _frontBackSecondsControllers[goal.exerciseId],
+                        onChanged: (value) {
+                          final frontBackSeconds = int.tryParse(value) ?? goal.frontBackSeconds;
+                          goalModel.setRollingTypeDurations(goal.exerciseId, goal.leftRightSeconds, frontBackSeconds, goal.heelSeconds);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Heel Rolling
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '脚后跟滚动时长',
+                    border: OutlineInputBorder(),
+                    suffixText: '秒',
+                  ),
+                  controller: _heelSecondsControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final heelSeconds = int.tryParse(value) ?? goal.heelSeconds;
+                    goalModel.setRollingTypeDurations(goal.exerciseId, goal.leftRightSeconds, goal.frontBackSeconds, heelSeconds);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
