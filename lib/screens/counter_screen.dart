@@ -7,6 +7,7 @@ import '../models/training_model.dart';
 import '../models/theme_model.dart';
 import '../models/goal_model.dart';
 import '../services/sound_service.dart';
+import 'training_completion_screen.dart';
 
 class CounterScreen extends StatefulWidget {
   final String exerciseId;
@@ -143,6 +144,7 @@ class _CounterScreenState extends State<CounterScreen> {
             _isResting = false;
             _isCountingDown = true;
             _countdownValue = 5;
+            _soundService.playRestEndSound(); // 播放休息结束声音
             _startCountdown();
             timer.cancel();
           }
@@ -190,7 +192,7 @@ class _CounterScreenState extends State<CounterScreen> {
                 _currentSet++;
                 _isResting = true;
                 _countdownValue = _restBetweenSets;
-                _soundService.playCountdownSound();
+                _soundService.playRestStartSound(); // 播放休息开始声音
               }
             }
           }
@@ -262,21 +264,24 @@ class _CounterScreenState extends State<CounterScreen> {
     // 播放完成声音
     _soundService.playCheerSound();
 
-    // Show completion dialog
+    // Show beautiful completion screen
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('训练完成'),
-        content: Text('完成 $_count 次训练，用时 $_trainingDuration 秒'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.pop();
-            },
-            child: const Text('确定'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => TrainingCompletionScreen(
+        exerciseId: widget.exerciseId,
+        count: _count,
+        duration: _trainingDuration,
+        sets: _totalSets,
+        repsPerSet: _repsPerSet,
+        onRestart: () {
+          Navigator.of(context).pop();
+          _resetTraining();
+        },
+        onReturnHome: () {
+          Navigator.of(context).pop();
+          context.pop();
+        },
       ),
     );
   }

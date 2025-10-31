@@ -179,28 +179,20 @@ class TrainingPlanScreen extends StatelessWidget {
                       ),
                       trailing: completed
                           ? ElevatedButton(
-                              onPressed: null, // Disabled button
+                              onPressed: () {
+                                if (exercise.type == ExerciseType.timer) {
+                                  context.go('/timer/$exerciseId');
+                                } else {
+                                  context.go('/counter/$exerciseId');
+                                }
+                              },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.withAlpha(25),
-                                foregroundColor: Colors.green,
-                                disabledBackgroundColor: Colors.green.withAlpha(25),
-                                disabledForegroundColor: Colors.green,
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
                               ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.check,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    '已完成',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
+                              child: const Text(
+                                '重新开始',
+                                style: TextStyle(fontSize: 16),
                               ),
                             )
                           : ElevatedButton(
