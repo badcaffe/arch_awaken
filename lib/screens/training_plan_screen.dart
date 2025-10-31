@@ -180,7 +180,9 @@ class TrainingPlanScreen extends StatelessWidget {
                       trailing: completed
                           ? ElevatedButton(
                               onPressed: () {
-                                if (exercise.type == ExerciseType.timer) {
+                                if (exerciseId == 'foot_ball_rolling') {
+                                  context.go('/foot-ball-rolling/$exerciseId');
+                                } else if (exercise.type == ExerciseType.timer) {
                                   context.go('/timer/$exerciseId');
                                 } else {
                                   context.go('/counter/$exerciseId');
@@ -197,7 +199,9 @@ class TrainingPlanScreen extends StatelessWidget {
                             )
                           : ElevatedButton(
                               onPressed: () {
-                                if (exercise.type == ExerciseType.timer) {
+                                if (exerciseId == 'foot_ball_rolling') {
+                                  context.go('/foot-ball-rolling/$exerciseId');
+                                } else if (exercise.type == ExerciseType.timer) {
                                   context.go('/timer/$exerciseId');
                                 } else {
                                   context.go('/counter/$exerciseId');

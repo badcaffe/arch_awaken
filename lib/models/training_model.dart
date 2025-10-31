@@ -107,6 +107,14 @@ class TrainingModel extends ChangeNotifier {
       icon: Icons.self_improvement,
       color: Colors.grey, // Will be overridden by theme
     ),
+    TrainingExercise(
+      id: 'foot_ball_rolling',
+      name: '脚底滚球',
+      description: '',
+      type: ExerciseType.timer,
+      icon: Icons.sports_baseball,
+      color: Colors.grey, // Will be overridden by theme
+    ),
   ];
 
   List<TrainingRecord> _records = [];

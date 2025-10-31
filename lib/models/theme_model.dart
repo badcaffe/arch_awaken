@@ -42,6 +42,7 @@ class ThemeModel extends ChangeNotifier {
         'frog_pose': const Color(0xFFFFB74D), // Light orange
         'glute_bridge': const Color(0xFFD32F2F), // Red
         'stretching': const Color(0xFF7B1FA2), // Purple
+        'foot_ball_rolling': const Color(0xFFFF5722), // Deep orange-red
       },
     ),
     ThemeScheme.forest: AppTheme(
@@ -57,6 +58,7 @@ class ThemeModel extends ChangeNotifier {
         'frog_pose': const Color(0xFF66BB6A), // Light green
         'glute_bridge': const Color(0xFF1976D2), // Blue
         'stretching': const Color(0xFF7B1FA2), // Purple
+        'foot_ball_rolling': const Color(0xFF4CAF50), // Bright green
       },
     ),
     ThemeScheme.ocean: AppTheme(
@@ -72,6 +74,7 @@ class ThemeModel extends ChangeNotifier {
         'frog_pose': const Color(0xFF64B5F6), // Light blue
         'glute_bridge': const Color(0xFF0097A7), // Teal
         'stretching': const Color(0xFF9575CD), // Lavender
+        'foot_ball_rolling': const Color(0xFF03A9F4), // Light blue
       },
     ),
     ThemeScheme.lavender: AppTheme(
@@ -87,6 +90,7 @@ class ThemeModel extends ChangeNotifier {
         'frog_pose': const Color(0xFFBA68C8), // Light purple
         'glute_bridge': const Color(0xFFE91E63), // Pink
         'stretching': const Color(0xFF3F51B5), // Indigo
+        'foot_ball_rolling': const Color(0xFF9C27B0), // Bright purple
       },
     ),
     ThemeScheme.dark: AppTheme(
@@ -129,6 +133,7 @@ class ThemeModel extends ChangeNotifier {
         'frog_pose': const Color(0xFF505050), // Very dark gray
         'glute_bridge': const Color(0xFF808080), // Standard gray
         'stretching': const Color(0xFF606060), // Medium-dark gray
+        'foot_ball_rolling': const Color(0xFFA0A0A0), // Light gray
       },
     ),
   };

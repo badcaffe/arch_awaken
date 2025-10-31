@@ -226,6 +226,18 @@ class GoalModel extends ChangeNotifier {
       restInterval: 30,
       sets: 1,
     );
+
+    _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
+      exerciseId: 'foot_ball_rolling',
+      exerciseName: '脚底滚球',
+      repsPerSet: 10,
+      targetSeconds: 60, // 默认60秒
+      restInterval: 10,
+      sets: 1,
+      hasLeftRight: true, // 区分左右脚
+      leftTarget: 60, // 左脚目标60秒
+      rightTarget: 60, // 右脚目标60秒
+    );
   }
 
   Future<void> _saveGoals() async {

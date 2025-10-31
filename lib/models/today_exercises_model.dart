@@ -76,6 +76,7 @@ class TodayExercisesModel extends ChangeNotifier {
       'frog_pose',
       'glute_bridge',
       'stretching',
+      'foot_ball_rolling',
     ];
   }
 
