@@ -19,6 +19,7 @@ import 'screens/about_screen.dart';
 import 'screens/training_introduction_screen.dart';
 import 'screens/foot_ball_rolling_screen.dart';
 import 'screens/group_timer_screen.dart';
+import 'screens/training_interval_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -112,6 +113,13 @@ class ArchAwakenApp extends StatelessWidget {
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
                 return FootBallRollingScreen(exerciseId: exerciseId);
+              },
+            ),
+            GoRoute(
+              path: 'training-interval',
+              builder: (BuildContext context, GoRouterState state) {
+                final params = state.extra as Map<String, dynamic>?;
+                return TrainingIntervalScreen(params: params);
               },
             ),
           ],

@@ -23,6 +23,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
   final Map<String, TextEditingController> _leftRightSecondsControllers = {};
   final Map<String, TextEditingController> _frontBackSecondsControllers = {};
   final Map<String, TextEditingController> _heelSecondsControllers = {};
+  final Map<String, TextEditingController> _trainingIntervalControllers = {};
 
   @override
   void initState() {
@@ -67,6 +68,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           () => TextEditingController(text: goal.frontBackSeconds.toString()));
       _heelSecondsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.heelSeconds.toString()));
+      _trainingIntervalControllers.putIfAbsent(goal.exerciseId,
+          () => TextEditingController(text: goal.trainingInterval.toString()));
     }
   }
 
@@ -105,6 +108,9 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       controller.dispose();
     }
     for (final controller in _heelSecondsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _trainingIntervalControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -532,6 +538,48 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
         ),
         const SizedBox(height: 16),
 
+        // Training Interval (训练间隔)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '训练项目间隔',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '按顺序训练时，项目之间的休息时间',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '训练项目间隔',
+                    border: OutlineInputBorder(),
+                    suffixText: '秒',
+                  ),
+                  controller: _trainingIntervalControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final interval = int.tryParse(value) ?? goal.trainingInterval;
+                    goalModel.setTrainingInterval(goal.exerciseId, interval);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
         // Count Interval (计数中)
         Card(
           child: Padding(
@@ -790,6 +838,48 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
                   onChanged: (value) {
                     final heelSeconds = int.tryParse(value) ?? goal.heelSeconds;
                     goalModel.setRollingTypeDurations(goal.exerciseId, goal.leftRightSeconds, goal.frontBackSeconds, heelSeconds);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Training Interval (训练间隔)
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '训练项目间隔',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '按顺序训练时，项目之间的休息时间',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: '训练项目间隔',
+                    border: OutlineInputBorder(),
+                    suffixText: '秒',
+                  ),
+                  controller: _trainingIntervalControllers[goal.exerciseId],
+                  onChanged: (value) {
+                    final interval = int.tryParse(value) ?? goal.trainingInterval;
+                    goalModel.setTrainingInterval(goal.exerciseId, interval);
                   },
                 ),
               ],

@@ -7,6 +7,7 @@ import '../models/training_model.dart';
 import '../models/theme_model.dart';
 import '../models/goal_model.dart';
 import '../services/sound_service.dart';
+import 'sequential_training_completion_dialog.dart';
 import 'training_completion_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -253,18 +254,84 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _completeTraining() {
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+    final goalModel = Provider.of<GoalModel>(context, listen: false);
+
     final record = TrainingRecord(
       exerciseId: widget.exerciseId,
       date: DateTime.now(),
       duration: _trainingDuration,
       count: _count,
     );
-    _trainingModel.addRecord(record);
+    trainingModel.addRecord(record);
 
     // 播放完成声音
     _soundService.playCheerSound();
 
-    // Show beautiful completion screen
+    // Check if we're in sequential training mode
+    if (trainingModel.isSequentialTrainingActive) {
+      final currentExerciseId = trainingModel.getCurrentSequentialExercise();
+      final nextExerciseId = trainingModel.getNextSequentialExercise();
+
+      if (nextExerciseId != null) {
+        // Show sequential completion dialog
+        _showSequentialCompletionDialog(currentExerciseId, nextExerciseId, trainingModel, goalModel);
+      } else {
+        // End of sequence
+        trainingModel.stopSequentialTraining();
+        _showRegularCompletionScreen();
+      }
+    } else {
+      _showRegularCompletionScreen();
+    }
+  }
+
+  void _showSequentialCompletionDialog(String? currentExerciseId, String? nextExerciseId, TrainingModel trainingModel, GoalModel goalModel) {
+    final goal = goalModel.getGoal(currentExerciseId ?? '');
+    final intervalSeconds = goal?.trainingInterval ?? 30;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => SequentialTrainingCompletionDialog(
+        currentExerciseId: currentExerciseId ?? '',
+        nextExerciseId: nextExerciseId ?? '',
+        intervalSeconds: intervalSeconds,
+        onContinue: () {
+          Navigator.of(context).pop();
+          // Move to next exercise and start training
+          trainingModel.moveToNextSequentialExercise();
+          _startNextTraining(nextExerciseId ?? '', trainingModel);
+        },
+        onStop: () {
+          Navigator.of(context).pop();
+          trainingModel.stopSequentialTraining();
+          context.pop();
+        },
+      ),
+    );
+  }
+
+  void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
+    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
+
+    if (nextExercise != null) {
+      if (nextExerciseId == 'foot_ball_rolling') {
+        context.go('/foot-ball-rolling/$nextExerciseId');
+      } else if (nextExercise.type == ExerciseType.timer) {
+        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
+          context.go('/group-timer/$nextExerciseId');
+        } else {
+          context.go('/timer/$nextExerciseId');
+        }
+      } else {
+        context.go('/counter/$nextExerciseId');
+      }
+    }
+  }
+
+  void _showRegularCompletionScreen() {
     showDialog(
       context: context,
       barrierDismissible: false,

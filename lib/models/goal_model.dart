@@ -17,6 +17,7 @@ class ExerciseGoal {
   int leftRightSeconds; // 左右滚动时长（秒）
   int frontBackSeconds; // 前后滚动时长（秒）
   int heelSeconds; // 脚后跟滚动时长（秒）
+  int trainingInterval; // 训练项目间隔时长（秒）
 
   ExerciseGoal({
     required this.exerciseId,
@@ -33,6 +34,7 @@ class ExerciseGoal {
     this.leftRightSeconds = 60, // 默认60秒
     this.frontBackSeconds = 60, // 默认60秒
     this.heelSeconds = 60, // 默认60秒
+    this.trainingInterval = 30, // 默认30秒
   });
 
   Map<String, dynamic> toJson() {
@@ -51,13 +53,14 @@ class ExerciseGoal {
       'leftRightSeconds': leftRightSeconds,
       'frontBackSeconds': frontBackSeconds,
       'heelSeconds': heelSeconds,
+      'trainingInterval': trainingInterval,
     };
   }
 
   factory ExerciseGoal.fromJson(Map<String, dynamic> json) {
     return ExerciseGoal(
-      exerciseId: json['exerciseId'],
-      exerciseName: json['exerciseName'],
+      exerciseId: json['exerciseId'] ?? '',
+      exerciseName: json['exerciseName'] ?? '',
       repsPerSet: json['repsPerSet'] ?? json['targetCount'] ?? 10, // 向后兼容
       targetSeconds: json['targetSeconds'] ?? 30,
       restInterval: json['restInterval'] ?? 10,
@@ -70,6 +73,7 @@ class ExerciseGoal {
       leftRightSeconds: json['leftRightSeconds'] ?? 60,
       frontBackSeconds: json['frontBackSeconds'] ?? 60,
       heelSeconds: json['heelSeconds'] ?? 60,
+      trainingInterval: json['trainingInterval'] ?? 30,
     );
   }
 }
@@ -170,6 +174,15 @@ class GoalModel extends ChangeNotifier {
     }
   }
 
+  void setTrainingInterval(String exerciseId, int interval) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.trainingInterval = interval;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
   Future<void> _loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final goalsJson = prefs.getString(_goalsKey);
@@ -196,6 +209,7 @@ class GoalModel extends ChangeNotifier {
             leftRightSeconds: 60,
             frontBackSeconds: 60,
             heelSeconds: 60,
+            trainingInterval: 30,
           );
           _saveGoals();
         }
@@ -224,6 +238,7 @@ class GoalModel extends ChangeNotifier {
       leftRightSeconds: 60, // 左右滚动默认60秒
       frontBackSeconds: 60, // 前后滚动默认60秒
       heelSeconds: 60, // 脚后跟滚动默认60秒
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['ball_tiptoe'] = ExerciseGoal(
@@ -233,6 +248,7 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 30,
       restInterval: 10,
       sets: 3,
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['yoga_brick_tiptoe'] = ExerciseGoal(
@@ -242,6 +258,7 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 30,
       restInterval: 10,
       sets: 3,
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['yoga_brick_ball_pickup'] = ExerciseGoal(
@@ -254,6 +271,7 @@ class GoalModel extends ChangeNotifier {
       leftTarget: 10,
       rightTarget: 10,
       sets: 3,
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['frog_pose'] = ExerciseGoal(
@@ -263,6 +281,7 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 60,
       restInterval: 30,
       sets: 1,
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['glute_bridge'] = ExerciseGoal(
@@ -272,6 +291,7 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 30,
       restInterval: 10,
       sets: 3,
+      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['stretching'] = ExerciseGoal(
@@ -281,6 +301,7 @@ class GoalModel extends ChangeNotifier {
       targetSeconds: 60,
       restInterval: 30,
       sets: 1,
+      trainingInterval: 30, // 默认30秒
     );
   }
 

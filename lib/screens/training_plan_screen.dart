@@ -7,8 +7,46 @@ import '../models/theme_model.dart';
 import '../models/goal_model.dart';
 import '../models/today_exercises_model.dart';
 
-class TrainingPlanScreen extends StatelessWidget {
+class TrainingPlanScreen extends StatefulWidget {
   const TrainingPlanScreen({super.key});
+
+  @override
+  State<TrainingPlanScreen> createState() => _TrainingPlanScreenState();
+}
+
+class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
+  void _startSequentialTraining(BuildContext context, List<Map<String, dynamic>> trainingPlan) {
+    if (trainingPlan.isEmpty) return;
+
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+
+    // 提取训练项目ID列表
+    final exerciseIds = trainingPlan.map((item) => item['exerciseId'] as String).toList();
+
+    // 启动顺序训练
+    trainingModel.startSequentialTraining(exerciseIds);
+
+    // 获取第一个训练项目
+    final firstExerciseId = trainingModel.getCurrentSequentialExercise();
+    if (firstExerciseId != null) {
+      final firstExerciseObj = trainingModel.getExerciseById(firstExerciseId);
+      if (firstExerciseObj != null) {
+        // 直接开始第一个训练项目
+        if (firstExerciseId == 'foot_ball_rolling') {
+          context.go('/foot-ball-rolling/$firstExerciseId');
+        } else if (firstExerciseObj.type == ExerciseType.timer) {
+          // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+          if (firstExerciseId == 'frog_pose' || firstExerciseId == 'stretching') {
+            context.go('/group-timer/$firstExerciseId');
+          } else {
+            context.go('/timer/$firstExerciseId');
+          }
+        } else {
+          context.go('/counter/$firstExerciseId');
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +157,61 @@ class TrainingPlanScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // 按顺序开始所有训练项目的按钮
+            if (trainingPlan.isNotEmpty)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '完整训练流程',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '按顺序完成所有$totalCount个训练项目，每个项目之间自动间隔休息',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _startSequentialTraining(context, trainingPlan);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.play_arrow),
+                              SizedBox(width: 8),
+                              Text(
+                                '按顺序开始所有训练',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 20),
             const Text(
               '训练目标',

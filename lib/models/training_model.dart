@@ -127,6 +127,13 @@ class TrainingModel extends ChangeNotifier {
   Set<String> _unlockedAchievements = {};
   Set<String> get unlockedAchievements => _unlockedAchievements;
 
+  // Sequential training state
+  List<String> _sequentialTrainingPlan = [];
+  int _currentSequentialIndex = -1;
+  bool get isSequentialTrainingActive => _currentSequentialIndex >= 0;
+  int get currentSequentialIndex => _currentSequentialIndex;
+  int get sequentialTrainingTotal => _sequentialTrainingPlan.length;
+
   TrainingModel() {
     _loadRecords();
     _loadAchievements();
@@ -258,6 +265,46 @@ class TrainingModel extends ChangeNotifier {
     print('💾 保存训练目标到存储: $targetsJson');
     await prefs.setString('exercise_targets', targetsJson);
     print('✅ 训练目标保存完成');
+  }
+
+  // Sequential training methods
+  void startSequentialTraining(List<String> exerciseIds) {
+    _sequentialTrainingPlan = List.from(exerciseIds);
+    _currentSequentialIndex = 0;
+    notifyListeners();
+  }
+
+  String? getCurrentSequentialExercise() {
+    if (_currentSequentialIndex >= 0 && _currentSequentialIndex < _sequentialTrainingPlan.length) {
+      return _sequentialTrainingPlan[_currentSequentialIndex];
+    }
+    return null;
+  }
+
+  String? getNextSequentialExercise() {
+    final nextIndex = _currentSequentialIndex + 1;
+    if (nextIndex < _sequentialTrainingPlan.length) {
+      return _sequentialTrainingPlan[nextIndex];
+    }
+    return null;
+  }
+
+  void moveToNextSequentialExercise() {
+    if (_currentSequentialIndex < _sequentialTrainingPlan.length - 1) {
+      _currentSequentialIndex++;
+      notifyListeners();
+    } else {
+      // End of sequence
+      _sequentialTrainingPlan.clear();
+      _currentSequentialIndex = -1;
+      notifyListeners();
+    }
+  }
+
+  void stopSequentialTraining() {
+    _sequentialTrainingPlan.clear();
+    _currentSequentialIndex = -1;
+    notifyListeners();
   }
 
   // Achievement checking methods
