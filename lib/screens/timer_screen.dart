@@ -137,17 +137,37 @@ class _TimerScreenState extends State<TimerScreen> {
         backgroundColor: exercise.color,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+            // 状态指示器
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: exercise.color.withAlpha(25),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: exercise.color, width: 2),
+              ),
+              child: Text(
+                _isRunning ? '训练中' : (_remainingTime == _initialTime ? '准备开始' : '暂停中'),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: exercise.color,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
             Container(
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                color: exercise.color.withOpacity(0.1),
+                color: exercise.color.withAlpha(25),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: exercise.color,
@@ -179,63 +199,52 @@ class _TimerScreenState extends State<TimerScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 if (!_isRunning && _remainingTime == _initialTime)
-                  ElevatedButton.icon(
+                  IconButton(
                     onPressed: _startTimer,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('开始'),
-                    style: ElevatedButton.styleFrom(
+                    style: IconButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.all(16),
+                      iconSize: 32,
                     ),
                   )
                 else if (_isRunning)
-                  ElevatedButton.icon(
+                  IconButton(
                     onPressed: _pauseTimer,
                     icon: const Icon(Icons.pause),
-                    label: const Text('暂停'),
-                    style: ElevatedButton.styleFrom(
+                    style: IconButton.styleFrom(
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.all(16),
+                      iconSize: 32,
                     ),
                   )
                 else if (!_isRunning && _remainingTime < _initialTime)
-                  ElevatedButton.icon(
+                  IconButton(
                     onPressed: _startTimer,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('继续'),
-                    style: ElevatedButton.styleFrom(
+                    style: IconButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.all(16),
+                      iconSize: 32,
                     ),
                   ),
-                ElevatedButton.icon(
+                IconButton(
                   onPressed: _resetTimer,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('重置'),
-                  style: ElevatedButton.styleFrom(
+                  style: IconButton.styleFrom(
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.all(16),
+                    iconSize: 32,
                   ),
                 ),
               ],
             ),
           ],
+        ),
         ),
       ),
     );

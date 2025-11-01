@@ -500,13 +500,59 @@ class _CounterScreenState extends State<CounterScreen> {
             ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+              // 状态指示器 - 显示当前组数
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: displayColor.withAlpha(25),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: displayColor, width: 2),
+                ),
+                child: Text(
+                  _getCounterStateText(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: displayColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 进度指示器 - 显示组数进度
+              if (_currentSet > 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(_totalSets, (index) {
+                    final isCurrent = index + 1 == _currentSet;
+                    final isCompleted = index + 1 < _currentSet;
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? Colors.green
+                            : isCurrent
+                                ? displayColor
+                                : Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
+                ),
+              if (_currentSet > 0)
+                const SizedBox(height: 20),
+
               // Main display
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -552,12 +598,12 @@ class _CounterScreenState extends State<CounterScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              // Training info
+              // 训练信息 - 显示当前次数和总完成次数
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '第$_currentSet/$_totalSets组: 第$_currentRep/$_repsPerSet次',
+                    '第$_currentRep/$_repsPerSet次',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -589,27 +635,25 @@ class _CounterScreenState extends State<CounterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _startTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.play_arrow),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.play_arrow),
                     ),
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _resetTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.refresh),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.refresh),
                     ),
                   ],
                 )
@@ -617,27 +661,25 @@ class _CounterScreenState extends State<CounterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _pauseTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.pause),
+                      style: IconButton.styleFrom(
                         backgroundColor: const Color(0xFF00695C),
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.pause),
                     ),
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _resetTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.refresh),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.refresh),
                     ),
                   ],
                 )
@@ -645,45 +687,53 @@ class _CounterScreenState extends State<CounterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _resumeTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.play_arrow),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.play_arrow),
                     ),
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _completeTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.check),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.check),
                     ),
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _resetTraining,
-                      style: ElevatedButton.styleFrom(
+                      icon: const Icon(Icons.refresh),
+                      style: IconButton.styleFrom(
                         backgroundColor: Colors.grey,
                         foregroundColor: Colors.white,
-                        shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(64, 64),
+                        iconSize: 32,
                       ),
-                      child: const Icon(Icons.refresh),
                     ),
                   ],
                 ),
             ],
           ),
+          ),
         ),
       ),
     );
+  }
+
+  String _getCounterStateText() {
+    if (_isResting) {
+      return '第$_currentSet组休息';
+    } else if (_currentSet > 0) {
+      return '第$_currentSet组';
+    } else {
+      return '准备开始';
+    }
   }
 }
