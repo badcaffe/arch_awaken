@@ -7,6 +7,8 @@ import 'theme_model.dart';
 
 enum ExerciseType { timer, counter }
 
+enum TrainingEntryType { individual, sequential }
+
 class TrainingExercise {
   final String id;
   final String name;
@@ -133,6 +135,10 @@ class TrainingModel extends ChangeNotifier {
   bool get isSequentialTrainingActive => _currentSequentialIndex >= 0;
   int get currentSequentialIndex => _currentSequentialIndex;
   int get sequentialTrainingTotal => _sequentialTrainingPlan.length;
+
+  // Training entry type tracking
+  TrainingEntryType _currentTrainingEntryType = TrainingEntryType.individual;
+  TrainingEntryType get currentTrainingEntryType => _currentTrainingEntryType;
 
   TrainingModel() {
     _loadRecords();
@@ -271,6 +277,7 @@ class TrainingModel extends ChangeNotifier {
   void startSequentialTraining(List<String> exerciseIds) {
     _sequentialTrainingPlan = List.from(exerciseIds);
     _currentSequentialIndex = 0;
+    _currentTrainingEntryType = TrainingEntryType.sequential;
     notifyListeners();
   }
 
@@ -304,6 +311,13 @@ class TrainingModel extends ChangeNotifier {
   void stopSequentialTraining() {
     _sequentialTrainingPlan.clear();
     _currentSequentialIndex = -1;
+    _currentTrainingEntryType = TrainingEntryType.individual;
+    notifyListeners();
+  }
+
+  // Training entry type methods
+  void setTrainingEntryType(TrainingEntryType entryType) {
+    _currentTrainingEntryType = entryType;
     notifyListeners();
   }
 

@@ -120,47 +120,12 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '今日进度',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.grey[200],
-                      color: Colors.green,
-                      minHeight: 8,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$completedCount/$totalCount 项已完成',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // 按顺序开始所有训练项目的按钮
-            if (trainingPlan.isNotEmpty)
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -168,61 +133,98 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        '完整训练流程',
+                        '今日进度',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 12),
+                      LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.grey[200],
+                        color: Colors.green,
+                        minHeight: 8,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        '按顺序完成所有$totalCount个训练项目，每个项目之间自动间隔休息',
+                        '$completedCount/$totalCount 项已完成',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _startSequentialTraining(context, trainingPlan);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.play_arrow),
-                              SizedBox(width: 8),
-                              Text(
-                                '按顺序开始所有训练',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
-            const Text(
-              '训练目标',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              // 按顺序开始所有训练项目的按钮
+              if (trainingPlan.isNotEmpty)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '完整训练流程',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '按顺序完成所有$totalCount个训练项目，每个项目之间自动间隔休息',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _startSequentialTraining(context, trainingPlan);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurple,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.play_arrow),
+                                SizedBox(width: 8),
+                                Text(
+                                  '按顺序开始所有训练',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 20),
+              const Text(
+                '训练目标',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
+              const SizedBox(height: 12),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: trainingPlan.length,
                 itemBuilder: (context, index) {
                   final planItem = trainingPlan[index];
@@ -238,7 +240,6 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                   // Get goal information for sets
                   final goal = goalModel.getGoal(exerciseId);
                   final sets = goal?.sets ?? 3;
-                  final totalCount = baseExercise.type == ExerciseType.timer ? target : target * sets;
 
                   // Create exercise with theme color
                   final exercise = TrainingExercise(
@@ -273,6 +274,9 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                       trailing: completed
                           ? ElevatedButton(
                               onPressed: () {
+                                final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+                                trainingModel.setTrainingEntryType(TrainingEntryType.individual);
+
                                 if (exerciseId == 'foot_ball_rolling') {
                                   context.go('/foot-ball-rolling/$exerciseId');
                                 } else if (exercise.type == ExerciseType.timer) {
@@ -297,6 +301,9 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                             )
                           : ElevatedButton(
                               onPressed: () {
+                                final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+                                trainingModel.setTrainingEntryType(TrainingEntryType.individual);
+
                                 if (exerciseId == 'foot_ball_rolling') {
                                   context.go('/foot-ball-rolling/$exerciseId');
                                 } else if (exercise.type == ExerciseType.timer) {
@@ -323,8 +330,8 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

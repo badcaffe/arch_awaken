@@ -153,7 +153,13 @@ class TrainingRecordsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final dateKey = sortedDates[index];
               final dateRecords = groupedRecords[dateKey]!;
-              final date = DateTime.parse('$dateKey 00:00:00');
+              // Parse the date key safely
+              final dateParts = dateKey.split('-');
+              final date = DateTime(
+                int.parse(dateParts[0]),
+                int.parse(dateParts[1]),
+                int.parse(dateParts[2]),
+              );
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),

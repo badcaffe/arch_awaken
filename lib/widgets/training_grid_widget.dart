@@ -66,7 +66,14 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
     final Map<String, Set<String>> completedExercisesByDate = {};
     for (final record in records) {
       final dateKey = _getDateKey(record.date);
-      final date = DateTime.parse('$dateKey 00:00:00');
+
+      // Parse date key safely by splitting and constructing DateTime manually
+      final dateParts = dateKey.split('-');
+      final date = DateTime(
+        int.parse(dateParts[0]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[2]),
+      );
 
       // Only include records within our date range
       if (date.isAfter(startDate.subtract(const Duration(days: 1))) &&
