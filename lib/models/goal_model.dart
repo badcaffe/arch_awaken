@@ -87,7 +87,29 @@ class GoalModel extends ChangeNotifier {
     _loadGoals();
   }
 
-  List<ExerciseGoal> get goals => _exerciseGoals.values.toList();
+  List<ExerciseGoal> get goals {
+    // Define the desired order of exercises, with foot_ball_rolling first
+    const List<String> exerciseOrder = [
+      'foot_ball_rolling',
+      'ball_tiptoe',
+      'yoga_brick_tiptoe',
+      'yoga_brick_ball_pickup',
+      'frog_pose',
+      'glute_bridge',
+      'stretching',
+    ];
+
+    // Create a list in the desired order
+    final List<ExerciseGoal> orderedGoals = [];
+    for (final exerciseId in exerciseOrder) {
+      final goal = _exerciseGoals[exerciseId];
+      if (goal != null) {
+        orderedGoals.add(goal);
+      }
+    }
+
+    return orderedGoals;
+  }
 
   ExerciseGoal? getGoal(String exerciseId) {
     return _exerciseGoals[exerciseId];
