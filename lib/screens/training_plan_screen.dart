@@ -118,38 +118,6 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
               context.go('/today-exercises-selection');
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.play_circle),
-            tooltip: '按顺序开始所有训练',
-            onPressed: () {
-              final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-              final todayExercisesModel = Provider.of<TodayExercisesModel>(context, listen: false);
-
-              // Set sequential mode and start training
-              trainingModel.setSequentialMode(true);
-              trainingModel.startSequentialTraining(todayExercisesModel.selectedExerciseIds);
-
-              // Navigate to first exercise
-              if (todayExercisesModel.selectedExerciseIds.isNotEmpty) {
-                final firstExerciseId = todayExercisesModel.selectedExerciseIds.first;
-                final exercise = trainingModel.getExerciseById(firstExerciseId);
-
-                if (exercise != null) {
-                  if (firstExerciseId == 'foot_ball_rolling') {
-                    context.go('/foot-ball-rolling/$firstExerciseId');
-                  } else if (exercise.type == ExerciseType.timer) {
-                    if (firstExerciseId == 'frog_pose' || firstExerciseId == 'stretching') {
-                      context.go('/group-timer/$firstExerciseId');
-                    } else {
-                      context.go('/timer/$firstExerciseId');
-                    }
-                  } else {
-                    context.go('/counter/$firstExerciseId');
-                  }
-                }
-              }
-            },
-          ),
         ],
       ),
       body: Padding(
@@ -220,6 +188,32 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             _startSequentialTraining(context, trainingPlan);
+                            final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+                            final todayExercisesModel = Provider.of<TodayExercisesModel>(context, listen: false);
+       
+                            // Set sequential mode and start training
+                            trainingModel.setSequentialMode(true);
+                            trainingModel.startSequentialTraining(todayExercisesModel.selectedExerciseIds);
+       
+                            // Navigate to first exercise
+                            if (todayExercisesModel.selectedExerciseIds.isNotEmpty) {
+                              final firstExerciseId = todayExercisesModel.selectedExerciseIds.first;
+                              final exercise = trainingModel.getExerciseById(firstExerciseId);
+              
+                              if (exercise != null) {
+                                if (firstExerciseId == 'foot_ball_rolling') {
+                                  context.go('/foot-ball-rolling/$firstExerciseId');
+                                } else if (exercise.type == ExerciseType.timer) {
+                                  if (firstExerciseId == 'frog_pose' || firstExerciseId == 'stretching') {
+                                    context.go('/group-timer/$firstExerciseId');
+                                  } else {
+                                    context.go('/timer/$firstExerciseId');
+                                  }
+                                } else {
+                                  context.go('/counter/$firstExerciseId');
+                                }
+                              }
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
