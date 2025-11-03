@@ -7,7 +7,6 @@ import '../models/training_model.dart';
 import '../models/theme_model.dart';
 import '../models/goal_model.dart';
 import '../services/sound_service.dart';
-import 'sequential_training_completion_dialog.dart';
 import 'training_completion_screen.dart';
 
 class CounterScreen extends StatefulWidget {
@@ -61,6 +60,14 @@ class _CounterScreenState extends State<CounterScreen> {
     _totalSets = goal?.sets ?? 3;
     _countInterval = goal?.countInterval ?? 5;
     _prepareInterval = goal?.prepareInterval ?? 1;
+
+    // Check if we're in sequential training mode and auto-start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_trainingModel.isSequentialTrainingActive) {
+        // Auto-start for sequential training
+        _startTraining();
+      }
+    });
   }
 
   @override
@@ -270,12 +277,11 @@ class _CounterScreenState extends State<CounterScreen> {
 
     // Check if we're in sequential training mode
     if (trainingModel.isSequentialTrainingActive) {
-      final currentExerciseId = trainingModel.getCurrentSequentialExercise();
       final nextExerciseId = trainingModel.getNextSequentialExercise();
 
       if (nextExerciseId != null) {
-        // Show sequential completion dialog
-        _showSequentialCompletionDialog(currentExerciseId, nextExerciseId, trainingModel, goalModel);
+        // Show completion screen with next training option
+        _showRegularCompletionScreen(nextExerciseId: nextExerciseId);
       } else {
         // End of sequence
         trainingModel.stopSequentialTraining();
@@ -286,31 +292,6 @@ class _CounterScreenState extends State<CounterScreen> {
     }
   }
 
-  void _showSequentialCompletionDialog(String? currentExerciseId, String? nextExerciseId, TrainingModel trainingModel, GoalModel goalModel) {
-    final goal = goalModel.getGoal(currentExerciseId ?? '');
-    final intervalSeconds = goal?.trainingInterval ?? 30;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => SequentialTrainingCompletionDialog(
-        currentExerciseId: currentExerciseId ?? '',
-        nextExerciseId: nextExerciseId ?? '',
-        intervalSeconds: intervalSeconds,
-        onContinue: () {
-          Navigator.of(context).pop();
-          // Move to next exercise and start training
-          trainingModel.moveToNextSequentialExercise();
-          _startNextTraining(nextExerciseId ?? '', trainingModel);
-        },
-        onStop: () {
-          Navigator.of(context).pop();
-          trainingModel.stopSequentialTraining();
-          context.pop();
-        },
-      ),
-    );
-  }
 
   void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
     final nextExercise = trainingModel.getExerciseById(nextExerciseId);
@@ -331,7 +312,7 @@ class _CounterScreenState extends State<CounterScreen> {
     }
   }
 
-  void _showRegularCompletionScreen() {
+  void _showRegularCompletionScreen({String? nextExerciseId}) {
     final trainingModel = Provider.of<TrainingModel>(context, listen: false);
 
     showDialog(
@@ -351,14 +332,10 @@ class _CounterScreenState extends State<CounterScreen> {
           Navigator.of(context).pop();
           context.pop();
         },
-        onNextTraining: trainingModel.isSequentialTrainingActive ? () {
+        onNextTraining: nextExerciseId != null ? () {
           Navigator.of(context).pop();
-          // Move to next exercise and start training
-          final nextExerciseId = trainingModel.getNextSequentialExercise();
-          if (nextExerciseId != null) {
-            trainingModel.moveToNextSequentialExercise();
-            _startNextTraining(nextExerciseId, trainingModel);
-          }
+          trainingModel.moveToNextSequentialExercise();
+          _startNextTraining(nextExerciseId, trainingModel);
         } : null,
       ),
     );

@@ -41,6 +41,15 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
   void initState() {
     super.initState();
     _loadGoalSettings();
+
+    // Check if we're in sequential training mode and auto-start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+      if (trainingModel.isSequentialTrainingActive) {
+        // Auto-start for sequential training
+        _startTimer();
+      }
+    });
   }
 
   @override
@@ -216,6 +225,12 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
   void _showCompletionDialog() {
     final trainingModel = Provider.of<TrainingModel>(context, listen: false);
 
+    // Check if we're in sequential training mode and get next exercise
+    String? nextExerciseId;
+    if (trainingModel.isSequentialTrainingActive) {
+      nextExerciseId = trainingModel.getNextSequentialExercise();
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -234,14 +249,10 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
             Navigator.of(context).pop();
             context.go('/');
           },
-          onNextTraining: trainingModel.isSequentialTrainingActive ? () {
+          onNextTraining: nextExerciseId != null ? () {
             Navigator.of(context).pop();
-            // Move to next exercise and start training
-            final nextExerciseId = trainingModel.getNextSequentialExercise();
-            if (nextExerciseId != null) {
-              trainingModel.moveToNextSequentialExercise();
-              _startNextTraining(nextExerciseId, trainingModel);
-            }
+            trainingModel.moveToNextSequentialExercise();
+            _startNextTraining(nextExerciseId!, trainingModel);
           } : null,
         );
       },

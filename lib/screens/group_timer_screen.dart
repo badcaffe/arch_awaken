@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
+import 'training_completion_screen.dart';
 
 class GroupTimerScreen extends StatefulWidget {
   final String exerciseId;
@@ -36,6 +37,15 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+
+    // Check if we're in sequential training mode and auto-start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+      if (trainingModel.isSequentialTrainingActive) {
+        // Auto-start for sequential training
+        _startWorkout();
+      }
+    });
   }
 
   @override
@@ -131,21 +141,68 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     );
     trainingModel.addRecord(record);
 
-    // 显示完成对话框
+    // Check if we're in sequential training mode
+    if (trainingModel.isSequentialTrainingActive) {
+      final nextExerciseId = trainingModel.getNextSequentialExercise();
+
+      if (nextExerciseId != null) {
+        // Show completion screen with next training option
+        _showCompletionScreen(nextExerciseId: nextExerciseId, totalDuration: totalDuration);
+      } else {
+        // End of sequence
+        trainingModel.stopSequentialTraining();
+        _showCompletionScreen(totalDuration: totalDuration);
+      }
+    } else {
+      _showCompletionScreen(totalDuration: totalDuration);
+    }
+  }
+
+  void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
+    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
+
+    if (nextExercise != null) {
+      if (nextExerciseId == 'foot_ball_rolling') {
+        context.go('/foot-ball-rolling/$nextExerciseId');
+      } else if (nextExercise.type == ExerciseType.timer) {
+        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
+          context.go('/group-timer/$nextExerciseId');
+        } else {
+          context.go('/timer/$nextExerciseId');
+        }
+      } else {
+        context.go('/counter/$nextExerciseId');
+      }
+    }
+  }
+
+  void _showCompletionScreen({String? nextExerciseId, required int totalDuration}) {
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('训练完成'),
-        content: Text('已完成 $_totalGroups 组训练！\n总时长: ${totalDuration ~/ 60}分${totalDuration % 60}秒'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.pop();
-            },
-            child: const Text('确定'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => TrainingCompletionScreen(
+        exerciseId: widget.exerciseId,
+        count: _totalGroups,
+        duration: totalDuration,
+        sets: _totalGroups,
+        repsPerSet: 1,
+        onRestart: () {
+          Navigator.of(context).pop();
+          _resetTimer();
+          _startWorkout();
+        },
+        onReturnHome: () {
+          Navigator.of(context).pop();
+          context.pop();
+        },
+        onNextTraining: nextExerciseId != null ? () {
+          Navigator.of(context).pop();
+          trainingModel.moveToNextSequentialExercise();
+          _startNextTraining(nextExerciseId, trainingModel);
+        } : null,
       ),
     );
   }

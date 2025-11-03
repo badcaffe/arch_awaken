@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
-import '../models/goal_model.dart';
-import 'sequential_training_completion_dialog.dart';
+import 'training_completion_screen.dart';
 
 class TimerScreen extends StatefulWidget {
   final String exerciseId;
@@ -30,6 +29,15 @@ class _TimerScreenState extends State<TimerScreen> {
   void initState() {
     super.initState();
     _remainingTime = _initialTime;
+
+    // Check if we're in sequential training mode and auto-start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+      if (trainingModel.isSequentialTrainingActive) {
+        // Auto-start for sequential training
+        _startTimer();
+      }
+    });
   }
 
   @override
@@ -73,7 +81,6 @@ class _TimerScreenState extends State<TimerScreen> {
 
   void _saveRecord() {
     final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-    final goalModel = Provider.of<GoalModel>(context, listen: false);
     final record = TrainingRecord(
       exerciseId: widget.exerciseId,
       date: DateTime.now(),
@@ -84,46 +91,19 @@ class _TimerScreenState extends State<TimerScreen> {
 
     // Check if we're in sequential training mode
     if (trainingModel.isSequentialTrainingActive) {
-      final currentExerciseId = trainingModel.getCurrentSequentialExercise();
       final nextExerciseId = trainingModel.getNextSequentialExercise();
 
       if (nextExerciseId != null) {
         // Show completion screen with next training option
-        _showSequentialCompletionDialog(currentExerciseId, nextExerciseId, trainingModel, goalModel);
+        _showCompletionScreen(nextExerciseId: nextExerciseId);
       } else {
         // End of sequence
         trainingModel.stopSequentialTraining();
-        _showCompletionDialog();
+        _showCompletionScreen();
       }
     } else {
-      _showCompletionDialog();
+      _showCompletionScreen();
     }
-  }
-
-  void _showSequentialCompletionDialog(String? currentExerciseId, String? nextExerciseId, TrainingModel trainingModel, GoalModel goalModel) {
-    final goal = goalModel.getGoal(currentExerciseId ?? '');
-    final intervalSeconds = goal?.trainingInterval ?? 30;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => SequentialTrainingCompletionDialog(
-        currentExerciseId: currentExerciseId ?? '',
-        nextExerciseId: nextExerciseId ?? '',
-        intervalSeconds: intervalSeconds,
-        onContinue: () {
-          Navigator.of(context).pop();
-          // Move to next exercise and start training
-          trainingModel.moveToNextSequentialExercise();
-          _startNextTraining(nextExerciseId ?? '', trainingModel);
-        },
-        onStop: () {
-          Navigator.of(context).pop();
-          trainingModel.stopSequentialTraining();
-          context.pop();
-        },
-      ),
-    );
   }
 
   void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
@@ -145,21 +125,32 @@ class _TimerScreenState extends State<TimerScreen> {
     }
   }
 
-  void _showCompletionDialog() {
+  void _showCompletionScreen({String? nextExerciseId}) {
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('训练完成'),
-        content: const Text('计时训练已完成！'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.pop();
-            },
-            child: const Text('确定'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => TrainingCompletionScreen(
+        exerciseId: widget.exerciseId,
+        count: 1,
+        duration: _initialTime,
+        sets: 1,
+        repsPerSet: 1,
+        onRestart: () {
+          Navigator.of(context).pop();
+          _resetTimer();
+          _startTimer();
+        },
+        onReturnHome: () {
+          Navigator.of(context).pop();
+          context.pop();
+        },
+        onNextTraining: nextExerciseId != null ? () {
+          Navigator.of(context).pop();
+          trainingModel.moveToNextSequentialExercise();
+          _startNextTraining(nextExerciseId, trainingModel);
+        } : null,
       ),
     );
   }
