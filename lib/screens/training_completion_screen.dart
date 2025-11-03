@@ -224,8 +224,9 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                           Column(
                             children: [
                               // Next training button for sequential training
-                              ElevatedButton(
-                                onPressed: widget.onNextTraining,
+                              if (trainingModel.isSequentialMode)
+                                ElevatedButton(
+                                  onPressed: widget.onNextTraining,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: color,
                                   foregroundColor: Colors.white,

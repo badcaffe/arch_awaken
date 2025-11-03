@@ -63,9 +63,8 @@ class _CounterScreenState extends State<CounterScreen> {
 
     // Check if we're in sequential training mode and auto-start
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentExercise = _trainingModel.getCurrentSequentialExercise();
-      // Auto-start if this exercise is the current one in sequential training
-      if (currentExercise == widget.exerciseId) {
+      // Auto-start if sequential mode is enabled
+      if (_trainingModel.isSequentialMode) {
         _startTraining();
       }
     });
@@ -335,8 +334,15 @@ class _CounterScreenState extends State<CounterScreen> {
         },
         onNextTraining: nextExerciseId != null ? () {
           Navigator.of(context).pop();
-          trainingModel.moveToNextSequentialExercise();
           _startNextTraining(nextExerciseId, trainingModel);
+          // 延迟移动到下一个练习，确保新页面能正确获取当前练习ID
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            trainingModel.moveToNextSequentialExercise();
+              // Auto-start if sequential mode is enabled
+              if (trainingModel.isSequentialMode) {
+                _startTraining();
+              }
+          });
         } : null,
       ),
     );

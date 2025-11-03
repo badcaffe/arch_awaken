@@ -130,6 +130,10 @@ class TrainingModel extends ChangeNotifier {
   List<String> _sequentialTrainingPlan = [];
   int _currentSequentialIndex = -1;
   bool get isSequentialTrainingActive => _currentSequentialIndex >= 0;
+
+  // Global sequential training mode flag
+  bool _isSequentialMode = false;
+  bool get isSequentialMode => _isSequentialMode;
   int get currentSequentialIndex => _currentSequentialIndex;
   int get sequentialTrainingTotal => _sequentialTrainingPlan.length;
 
@@ -303,6 +307,17 @@ class TrainingModel extends ChangeNotifier {
   void stopSequentialTraining() {
     _sequentialTrainingPlan.clear();
     _currentSequentialIndex = -1;
+    notifyListeners();
+  }
+
+  // Global sequential training mode methods
+  void setSequentialMode(bool enabled) {
+    _isSequentialMode = enabled;
+    notifyListeners();
+  }
+
+  void clearSequentialMode() {
+    _isSequentialMode = false;
     notifyListeners();
   }
 

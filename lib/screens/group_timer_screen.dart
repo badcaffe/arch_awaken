@@ -41,9 +41,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     // Check if we're in sequential training mode and auto-start
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-      final currentExercise = trainingModel.getCurrentSequentialExercise();
-      // Auto-start if this exercise is the current one in sequential training
-      if (currentExercise == widget.exerciseId) {
+      // Auto-start if sequential mode is enabled
+      if (trainingModel.isSequentialMode) {
         _startWorkout();
       }
     });
@@ -201,8 +200,11 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         },
         onNextTraining: nextExerciseId != null ? () {
           Navigator.of(context).pop();
-          trainingModel.moveToNextSequentialExercise();
           _startNextTraining(nextExerciseId, trainingModel);
+          // 延迟移动到下一个练习，确保新页面能正确获取当前练习ID
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            trainingModel.moveToNextSequentialExercise();
+          });
         } : null,
       ),
     );
