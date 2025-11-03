@@ -238,7 +238,6 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                   // Get goal information for sets
                   final goal = goalModel.getGoal(exerciseId);
                   final sets = goal?.sets ?? 3;
-                  final totalCount = baseExercise.type == ExerciseType.timer ? target : target * sets;
 
                   // Create exercise with theme color
                   final exercise = TrainingExercise(

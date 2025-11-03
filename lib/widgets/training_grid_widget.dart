@@ -248,7 +248,7 @@ class _TrainingGridWidgetState extends State<TrainingGridWidget> {
                               }).toList(),
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),

@@ -88,7 +88,7 @@ class _CounterScreenState extends State<CounterScreen> {
     final countInterval = goal?.countInterval ?? 5;
     final prepareInterval = goal?.prepareInterval ?? 1;
 
-    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: ${countInterval}秒, 缓冲中: ${prepareInterval}秒');
+    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: $countInterval秒, 缓冲中: $prepareInterval秒');
 
     setState(() {
       _isRunning = true;

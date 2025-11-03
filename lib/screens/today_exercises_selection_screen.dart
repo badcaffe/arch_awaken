@@ -110,7 +110,7 @@ class TodayExercisesSelectionScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? themeModel.getExerciseColor(exercise.id).withOpacity(0.1)
+                            ? themeModel.getExerciseColor(exercise.id).withValues(alpha: 0.1)
                             : Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),

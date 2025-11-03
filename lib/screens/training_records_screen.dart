@@ -239,7 +239,7 @@ class TrainingRecordsScreen extends StatelessWidget {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
