@@ -196,6 +196,14 @@ class _TimerScreenState extends State<TimerScreen> {
         title: Text(exercise.name),
         backgroundColor: exercise.color,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Clear sequential mode when back button is pressed
+            trainingModel.clearSequentialMode();
+            context.pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(

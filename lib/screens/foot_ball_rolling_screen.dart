@@ -247,6 +247,8 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
           },
           onReturnHome: () {
             Navigator.of(context).pop();
+            // Clear sequential mode when returning to home
+            trainingModel.clearSequentialMode();
             context.go('/');
           },
           onNextTraining: nextExerciseId != null ? () {
@@ -317,6 +319,14 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
         title: const Text('脚底滚球训练'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Clear sequential mode when back button is pressed
+            trainingModel.clearSequentialMode();
+            context.pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(

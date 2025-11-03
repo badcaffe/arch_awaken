@@ -196,6 +196,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         },
         onReturnHome: () {
           Navigator.of(context).pop();
+          // Clear sequential mode when returning to home
+          trainingModel.clearSequentialMode();
           context.pop();
         },
         onNextTraining: nextExerciseId != null ? () {
@@ -301,6 +303,14 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         title: Text(exercise.name),
         backgroundColor: exercise.color,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Clear sequential mode when back button is pressed
+            trainingModel.clearSequentialMode();
+            context.pop();
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(_isEditingSettings ? Icons.check : Icons.settings),
