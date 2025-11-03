@@ -10,12 +10,10 @@ import 'sequential_training_completion_dialog.dart';
 
 class TimerScreen extends StatefulWidget {
   final String exerciseId;
-  final bool autoStart;
 
   const TimerScreen({
     super.key,
     required this.exerciseId,
-    this.autoStart = false,
   });
 
   @override
@@ -32,15 +30,6 @@ class _TimerScreenState extends State<TimerScreen> {
   void initState() {
     super.initState();
     _remainingTime = _initialTime;
-
-    // Auto start training if specified
-    if (widget.autoStart) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _startTimer();
-        }
-      });
-    }
   }
 
   @override
@@ -142,16 +131,16 @@ class _TimerScreenState extends State<TimerScreen> {
 
     if (nextExercise != null) {
       if (nextExerciseId == 'foot_ball_rolling') {
-        context.go('/foot-ball-rolling/$nextExerciseId?autoStart=true');
+        context.go('/foot-ball-rolling/$nextExerciseId');
       } else if (nextExercise.type == ExerciseType.timer) {
         // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
         if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          context.go('/group-timer/$nextExerciseId?autoStart=true');
+          context.go('/group-timer/$nextExerciseId');
         } else {
-          context.go('/timer/$nextExerciseId?autoStart=true');
+          context.go('/timer/$nextExerciseId');
         }
       } else {
-        context.go('/counter/$nextExerciseId?autoStart=true');
+        context.go('/counter/$nextExerciseId');
       }
     }
   }

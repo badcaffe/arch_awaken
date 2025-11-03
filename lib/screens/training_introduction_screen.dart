@@ -188,9 +188,6 @@ class TrainingIntroductionScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-                  trainingModel.setTrainingEntryType(TrainingEntryType.individual);
-
                   if (themedExercise.id == 'foot_ball_rolling') {
                     context.go('/foot-ball-rolling/${themedExercise.id}');
                   } else if (themedExercise.type == ExerciseType.timer) {

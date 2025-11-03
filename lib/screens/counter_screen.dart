@@ -12,12 +12,10 @@ import 'training_completion_screen.dart';
 
 class CounterScreen extends StatefulWidget {
   final String exerciseId;
-  final bool autoStart;
 
   const CounterScreen({
     super.key,
     required this.exerciseId,
-    this.autoStart = false,
   });
 
   @override
@@ -63,48 +61,6 @@ class _CounterScreenState extends State<CounterScreen> {
     _totalSets = goal?.sets ?? 3;
     _countInterval = goal?.countInterval ?? 5;
     _prepareInterval = goal?.prepareInterval ?? 1;
-
-    print('🎯 计数器屏幕初始化: ${widget.exerciseId}, autoStart: ${widget.autoStart}');
-
-    // Auto start training if specified
-    if (widget.autoStart) {
-      print('🚀 准备自动开始训练: ${widget.exerciseId}');
-      // 使用多种方式确保自动开始执行
-      _scheduleAutoStart();
-    } else {
-      print('ℹ️ 手动开始训练: ${widget.exerciseId}');
-    }
-  }
-
-  void _scheduleAutoStart() {
-    // 方法1: 使用 WidgetsBinding
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('📋 WidgetsBinding 回调执行');
-      if (mounted) {
-        print('✅ 组件已挂载，开始训练');
-        _startTraining();
-      } else {
-        print('❌ 组件未挂载，尝试方法2');
-        // 方法2: 使用 Future.delayed
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) {
-            print('✅ 延迟后组件已挂载，开始训练');
-            _startTraining();
-          } else {
-            print('❌ 延迟后组件仍未挂载，尝试方法3');
-            // 方法3: 使用更长的延迟
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                print('✅ 最终延迟后组件已挂载，开始训练');
-                _startTraining();
-              } else {
-                print('❌ 最终延迟后组件仍未挂载，无法自动开始训练');
-              }
-            });
-          }
-        });
-      }
-    });
   }
 
   @override
@@ -117,15 +73,6 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _startTraining() {
-    print('🎬 _startTraining 被调用: ${widget.exerciseId}');
-    print('📊 当前状态: _isRunning=$_isRunning, _isCountingDown=$_isCountingDown');
-
-    // 如果已经在运行，则不再重复开始
-    if (_isRunning) {
-      print('⚠️ 训练已经在运行，跳过开始');
-      return;
-    }
-
     final goalModel = Provider.of<GoalModel>(context, listen: false);
     final goal = goalModel.getGoal(widget.exerciseId);
     final target = goal?.repsPerSet ?? 10;
@@ -133,10 +80,9 @@ class _CounterScreenState extends State<CounterScreen> {
     final countInterval = goal?.countInterval ?? 5;
     final prepareInterval = goal?.prepareInterval ?? 1;
 
-    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: $countInterval秒, 缓冲中: $prepareInterval秒');
+    print('🚀 开始训练: ${widget.exerciseId}, 每组次数: $target, 总组数: $sets, 计数中: ${countInterval}秒, 缓冲中: ${prepareInterval}秒');
 
     setState(() {
-      print('🔄 setState 回调执行，更新训练状态');
       _isRunning = true;
       _isCountingDown = true;
       _countdownValue = 5;
@@ -147,19 +93,15 @@ class _CounterScreenState extends State<CounterScreen> {
       _totalSets = sets;
       _countInterval = countInterval;
       _prepareInterval = prepareInterval;
-      print('📊 更新后状态: _isRunning=$_isRunning, _isCountingDown=$_isCountingDown');
     });
 
-    print('⏰ 开始倒计时');
     _startCountdown();
   }
 
   void _startCountdown() {
-    print('🔊 开始倒计时，播放声音');
     // 播放倒计时开始的声音
     _soundService.playCountdownSound();
 
-    print('⏱️ 创建倒计时定时器');
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
@@ -375,24 +317,21 @@ class _CounterScreenState extends State<CounterScreen> {
 
     if (nextExercise != null) {
       if (nextExerciseId == 'foot_ball_rolling') {
-        context.go('/foot-ball-rolling/$nextExerciseId?autoStart=true');
+        context.go('/foot-ball-rolling/$nextExerciseId');
       } else if (nextExercise.type == ExerciseType.timer) {
         // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
         if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          context.go('/group-timer/$nextExerciseId?autoStart=true');
+          context.go('/group-timer/$nextExerciseId');
         } else {
-          context.go('/timer/$nextExerciseId?autoStart=true');
+          context.go('/timer/$nextExerciseId');
         }
       } else {
-        context.go('/counter/$nextExerciseId?autoStart=true');
+        context.go('/counter/$nextExerciseId');
       }
     }
   }
 
   void _showRegularCompletionScreen() {
-    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-    final nextExerciseId = trainingModel.getNextSequentialExercise();
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -410,12 +349,6 @@ class _CounterScreenState extends State<CounterScreen> {
           Navigator.of(context).pop();
           context.pop();
         },
-        onStartNextTraining: nextExerciseId != null ? () {
-          Navigator.of(context).pop();
-          trainingModel.moveToNextSequentialExercise();
-          _startNextTraining(nextExerciseId, trainingModel);
-        } : null,
-        showNextTrainingButton: trainingModel.currentTrainingEntryType == TrainingEntryType.sequential && nextExerciseId != null,
       ),
     );
   }

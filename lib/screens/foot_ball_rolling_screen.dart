@@ -17,12 +17,10 @@ enum RollingType {
 
 class FootBallRollingScreen extends StatefulWidget {
   final String exerciseId;
-  final bool autoStart;
 
   const FootBallRollingScreen({
     super.key,
     required this.exerciseId,
-    this.autoStart = false,
   });
 
   @override
@@ -43,15 +41,6 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
   void initState() {
     super.initState();
     _loadGoalSettings();
-
-    // Auto start training if specified
-    if (widget.autoStart) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _startTimer();
-        }
-      });
-    }
   }
 
   @override
@@ -225,9 +214,6 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
   }
 
   void _showCompletionDialog() {
-    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-    final nextExerciseId = trainingModel.getNextSequentialExercise();
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -246,34 +232,9 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
             Navigator.of(context).pop();
             context.go('/');
           },
-          onStartNextTraining: nextExerciseId != null ? () {
-            Navigator.of(context).pop();
-            trainingModel.moveToNextSequentialExercise();
-            _startNextTraining(nextExerciseId, trainingModel);
-          } : null,
-          showNextTrainingButton: trainingModel.currentTrainingEntryType == TrainingEntryType.sequential && nextExerciseId != null,
         );
       },
     );
-  }
-
-  void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
-    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
-
-    if (nextExercise != null) {
-      if (nextExerciseId == 'foot_ball_rolling') {
-        context.go('/foot-ball-rolling/$nextExerciseId?autoStart=true');
-      } else if (nextExercise.type == ExerciseType.timer) {
-        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          context.go('/group-timer/$nextExerciseId?autoStart=true');
-        } else {
-          context.go('/timer/$nextExerciseId?autoStart=true');
-        }
-      } else {
-        context.go('/counter/$nextExerciseId?autoStart=true');
-      }
-    }
   }
 
   String _getRollingTypeName(RollingType type) {

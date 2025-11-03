@@ -67,25 +67,21 @@ class ArchAwakenApp extends StatelessWidget {
               path: 'timer/:exerciseId',
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
-                final autoStart = state.uri.queryParameters['autoStart'] == 'true';
-                return TimerScreen(exerciseId: exerciseId, autoStart: autoStart);
+                return TimerScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(
               path: 'counter/:exerciseId',
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
-                final autoStart = state.uri.queryParameters['autoStart'] == 'true';
-                print('🛣️ 路由到计数器屏幕: $exerciseId, autoStart: $autoStart, queryParams: ${state.uri.queryParameters}');
-                return CounterScreen(exerciseId: exerciseId, autoStart: autoStart);
+                return CounterScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(
               path: 'group-timer/:exerciseId',
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
-                final autoStart = state.uri.queryParameters['autoStart'] == 'true';
-                return GroupTimerScreen(exerciseId: exerciseId, autoStart: autoStart);
+                return GroupTimerScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(
@@ -116,8 +112,7 @@ class ArchAwakenApp extends StatelessWidget {
               path: 'foot-ball-rolling/:exerciseId',
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
-                final autoStart = state.uri.queryParameters['autoStart'] == 'true';
-                return FootBallRollingScreen(exerciseId: exerciseId, autoStart: autoStart);
+                return FootBallRollingScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(
