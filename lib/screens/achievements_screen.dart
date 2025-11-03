@@ -206,7 +206,7 @@ class AchievementsScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         SizedBox(
           height: 355, // Fixed height for the grid (7 rows of 40px + legend)
           child: TrainingGridWidget(daysToShow: 30),
@@ -221,7 +221,7 @@ class AchievementsScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
