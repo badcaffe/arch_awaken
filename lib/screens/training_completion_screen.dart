@@ -11,6 +11,7 @@ class TrainingCompletionScreen extends StatefulWidget {
   final int repsPerSet;
   final VoidCallback onRestart;
   final VoidCallback onReturnHome;
+  final VoidCallback? onNextTraining;
 
   const TrainingCompletionScreen({
     super.key,
@@ -21,6 +22,7 @@ class TrainingCompletionScreen extends StatefulWidget {
     required this.repsPerSet,
     required this.onRestart,
     required this.onReturnHome,
+    this.onNextTraining,
   });
 
   @override
@@ -31,7 +33,6 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
   late Animation<double> _fadeAnimation;
 
   @override
@@ -49,16 +50,6 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
-      ),
-    );
-
-    _opacityAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
       ),
     );
 
@@ -85,9 +76,9 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     if (minutes > 0) {
-      return '$minutes分${remainingSeconds}秒';
+      return '$minutes分$remainingSeconds秒';
     } else {
-      return '${remainingSeconds}秒';
+      return '$remainingSeconds秒';
     }
   }
 
@@ -134,58 +125,44 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                       topRight: Radius.circular(24),
                     ),
                   ),
-                  child: Stack(
-                    children: [
-                      // Confetti effect
-                      Positioned.fill(
-                        child: Opacity(
-                          opacity: _opacityAnimation.value,
-                          child: CustomPaint(
-                            painter: ConfettiPainter(),
+                  child: Center(
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color.withValues(alpha: 0.5),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 40,
+                            ),
                           ),
-                        ),
-                      ),
-                      // Main content
-                      Center(
-                        child: ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: color.withValues(alpha: 0.5),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '训练完成！',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: color,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 16),
+                          Text(
+                            '训练完成！',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 // Stats section
@@ -243,54 +220,129 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                         ),
                         const SizedBox(height: 24),
                         // Action buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: widget.onRestart,
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: color,
-                                  side: BorderSide(color: color),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                ),
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.refresh, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('重新开始'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: widget.onReturnHome,
+                        if (widget.onNextTraining != null)
+                          Column(
+                            children: [
+                              // Next training button for sequential training
+                              ElevatedButton(
+                                onPressed: widget.onNextTraining,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: color,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                                   elevation: 4,
                                 ),
                                 child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.home, size: 20),
+                                    Icon(Icons.arrow_forward, size: 20),
                                     SizedBox(width: 8),
-                                    Text('返回主页'),
+                                    Text('开始下一训练项目'),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: widget.onRestart,
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: color,
+                                        side: BorderSide(color: color),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.refresh, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('重新开始'),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: widget.onReturnHome,
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: color,
+                                        side: BorderSide(color: color),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.home, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('返回主页'),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        else
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: widget.onRestart,
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: color,
+                                    side: BorderSide(color: color),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.refresh, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('重新开始'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: widget.onReturnHome,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: color,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    elevation: 4,
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.home, size: 20),
+                                      SizedBox(width: 8),
+                                      Text('返回主页'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -340,57 +392,3 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
   }
 }
 
-class ConfettiPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2;
-
-    final colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-    ];
-
-    final random = Random();
-
-    for (int i = 0; i < 20; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final color = colors[random.nextInt(colors.length)];
-      final sizeConfetti = random.nextDouble() * 8 + 4;
-
-      paint.color = color;
-
-      // Draw confetti as small rectangles
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: Offset(x, y),
-          width: sizeConfetti,
-          height: sizeConfetti / 2,
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// Simple random number generator for confetti
-class Random {
-  int _seed = DateTime.now().millisecondsSinceEpoch;
-
-  double nextDouble() {
-    _seed = (_seed * 9301 + 49297) % 233280;
-    return _seed / 233280.0;
-  }
-
-  int nextInt(int max) {
-    return (nextDouble() * max).floor();
-  }
-}

@@ -214,6 +214,8 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
   }
 
   void _showCompletionDialog() {
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -232,9 +234,37 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
             Navigator.of(context).pop();
             context.go('/');
           },
+          onNextTraining: trainingModel.isSequentialTrainingActive ? () {
+            Navigator.of(context).pop();
+            // Move to next exercise and start training
+            final nextExerciseId = trainingModel.getNextSequentialExercise();
+            if (nextExerciseId != null) {
+              trainingModel.moveToNextSequentialExercise();
+              _startNextTraining(nextExerciseId, trainingModel);
+            }
+          } : null,
         );
       },
     );
+  }
+
+  void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
+    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
+
+    if (nextExercise != null) {
+      if (nextExerciseId == 'foot_ball_rolling') {
+        context.go('/foot-ball-rolling/$nextExerciseId');
+      } else if (nextExercise.type == ExerciseType.timer) {
+        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
+          context.go('/group-timer/$nextExerciseId');
+        } else {
+          context.go('/timer/$nextExerciseId');
+        }
+      } else {
+        context.go('/counter/$nextExerciseId');
+      }
+    }
   }
 
   String _getRollingTypeName(RollingType type) {

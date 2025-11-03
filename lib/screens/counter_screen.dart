@@ -332,6 +332,8 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _showRegularCompletionScreen() {
+    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -349,6 +351,15 @@ class _CounterScreenState extends State<CounterScreen> {
           Navigator.of(context).pop();
           context.pop();
         },
+        onNextTraining: trainingModel.isSequentialTrainingActive ? () {
+          Navigator.of(context).pop();
+          // Move to next exercise and start training
+          final nextExerciseId = trainingModel.getNextSequentialExercise();
+          if (nextExerciseId != null) {
+            trainingModel.moveToNextSequentialExercise();
+            _startNextTraining(nextExerciseId, trainingModel);
+          }
+        } : null,
       ),
     );
   }
