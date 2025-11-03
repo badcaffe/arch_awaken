@@ -33,8 +33,9 @@ class _TimerScreenState extends State<TimerScreen> {
     // Check if we're in sequential training mode and auto-start
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-      if (trainingModel.isSequentialTrainingActive) {
-        // Auto-start for sequential training
+      final currentExercise = trainingModel.getCurrentSequentialExercise();
+      // Auto-start if this exercise is the current one in sequential training
+      if (currentExercise == widget.exerciseId) {
         _startTimer();
       }
     });

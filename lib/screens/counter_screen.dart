@@ -63,8 +63,9 @@ class _CounterScreenState extends State<CounterScreen> {
 
     // Check if we're in sequential training mode and auto-start
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_trainingModel.isSequentialTrainingActive) {
-        // Auto-start for sequential training
+      final currentExercise = _trainingModel.getCurrentSequentialExercise();
+      // Auto-start if this exercise is the current one in sequential training
+      if (currentExercise == widget.exerciseId) {
         _startTraining();
       }
     });
