@@ -121,7 +121,7 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,6 +229,7 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                 ),
               ),
 
+            const SizedBox(height: 24.0),
             Text(
               '训练目标',
               style: AppTheme.headlineSmall(context).copyWith(
@@ -236,109 +237,106 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
               ),
             ),
             const SizedBox(height: 16.0),
-            Expanded(
-              child: ListView.builder(
-                itemCount: trainingPlan.length,
-                itemBuilder: (context, index) {
-                  final planItem = trainingPlan[index];
-                  final exerciseId = planItem['exerciseId'] as String;
-                  final target = planItem['target'] as int;
-                  final completed = planItem['completed'] as bool;
-                  final themeModel = Provider.of<ThemeModel>(context);
-                  final goalModel = Provider.of<GoalModel>(context);
-                  final baseExercise = trainingModel.getExerciseById(exerciseId);
+            // 使用 Column 替代 ListView.builder，配合 SingleChildScrollView 实现全页滚动
+            ...trainingPlan.map((planItem) {
+              final exerciseId = planItem['exerciseId'] as String;
+              final target = planItem['target'] as int;
+              final completed = planItem['completed'] as bool;
+              final themeModel = Provider.of<ThemeModel>(context);
+              final goalModel = Provider.of<GoalModel>(context);
+              final baseExercise = trainingModel.getExerciseById(exerciseId);
 
-                  if (baseExercise == null) return const SizedBox.shrink();
+              if (baseExercise == null) return const SizedBox.shrink();
 
-                  // Get goal information for sets
-                  final goal = goalModel.getGoal(exerciseId);
-                  final sets = goal?.sets ?? 3;
+              // Get goal information for sets
+              final goal = goalModel.getGoal(exerciseId);
+              final sets = goal?.sets ?? 3;
 
-                  // Create exercise with theme color
-                  final exercise = TrainingExercise(
-                    id: baseExercise.id,
-                    name: baseExercise.name,
-                    description: baseExercise.description,
-                    type: baseExercise.type,
-                    icon: baseExercise.icon,
-                    color: themeModel.getExerciseColor(baseExercise.id),
-                  );
+              // Create exercise with theme color
+              final exercise = TrainingExercise(
+                id: baseExercise.id,
+                name: baseExercise.name,
+                description: baseExercise.description,
+                type: baseExercise.type,
+                icon: baseExercise.icon,
+                color: themeModel.getExerciseColor(baseExercise.id),
+              );
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: AppTheme.cardDecoration(context),
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: exercise.color.withAlpha(25),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          exercise.icon,
-                          color: exercise.color,
-                        ),
-                      ),
-                      title: Text(
-                        exercise.name,
-                        style: AppTheme.titleMedium(context).copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      subtitle: Text(
-                        exercise.type == ExerciseType.timer
-                            ? '目标: $target秒'
-                            : '目标: $target次 × $sets',
-                        style: AppTheme.bodyMedium(context).copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: completed
-                          ? ElevatedButton(
-                              onPressed: () {
-                                if (exerciseId == 'foot_ball_rolling') {
-                                  context.go('/foot-ball-rolling/$exerciseId');
-                                } else if (exercise.type == ExerciseType.timer) {
-                                  // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-                                  if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
-                                    context.go('/group-timer/$exerciseId');
-                                  } else {
-                                    context.go('/timer/$exerciseId');
-                                  }
-                                } else {
-                                  context.go('/counter/$exerciseId');
-                                }
-                              },
-                              style: AppTheme.secondaryButtonStyle(context),
-                              child: const Text(
-                                '重新开始',
-                              ),
-                            )
-                          : ElevatedButton(
-                              onPressed: () {
-                                if (exerciseId == 'foot_ball_rolling') {
-                                  context.go('/foot-ball-rolling/$exerciseId');
-                                } else if (exercise.type == ExerciseType.timer) {
-                                  // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-                                  if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
-                                    context.go('/group-timer/$exerciseId');
-                                  } else {
-                                    context.go('/timer/$exerciseId');
-                                  }
-                                } else {
-                                  context.go('/counter/$exerciseId');
-                                }
-                              },
-                              style: AppTheme.primaryButtonStyle(context),
-                              child: const Text(
-                                '开始训练',
-                              ),
-                            ),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: AppTheme.cardDecoration(context),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: exercise.color.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                },
-              ),
-            ),
+                    child: Icon(
+                      exercise.icon,
+                      color: exercise.color,
+                    ),
+                  ),
+                  title: Text(
+                    exercise.name,
+                    style: AppTheme.titleMedium(context).copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    exercise.type == ExerciseType.timer
+                        ? '目标: $target秒'
+                        : '目标: $target次 × $sets',
+                    style: AppTheme.bodyMedium(context).copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: completed
+                      ? ElevatedButton(
+                          onPressed: () {
+                            if (exerciseId == 'foot_ball_rolling') {
+                              context.go('/foot-ball-rolling/$exerciseId');
+                            } else if (exercise.type == ExerciseType.timer) {
+                              // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+                              if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
+                                context.go('/group-timer/$exerciseId');
+                              } else {
+                                context.go('/timer/$exerciseId');
+                              }
+                            } else {
+                              context.go('/counter/$exerciseId');
+                            }
+                          },
+                          style: AppTheme.secondaryButtonStyle(context),
+                          child: const Text(
+                            '重新开始',
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: () {
+                            if (exerciseId == 'foot_ball_rolling') {
+                              context.go('/foot-ball-rolling/$exerciseId');
+                            } else if (exercise.type == ExerciseType.timer) {
+                              // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
+                              if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
+                                context.go('/group-timer/$exerciseId');
+                              } else {
+                                context.go('/timer/$exerciseId');
+                              }
+                            } else {
+                              context.go('/counter/$exerciseId');
+                            }
+                          },
+                          style: AppTheme.primaryButtonStyle(context),
+                          child: const Text(
+                            '开始训练',
+                          ),
+                        ),
+                ),
+              );
+            }),
+            // 添加底部间距，确保最后一个项目不会被底部导航栏遮挡
+            const SizedBox(height: 100),
           ],
         ),
       ),

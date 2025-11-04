@@ -407,6 +407,87 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+
+                    // 左右脚图形示意
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 左脚
+                        Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: _isLeftFoot
+                                    ? exerciseColor.withAlpha(25)
+                                    : Colors.grey.withAlpha(25),
+                                border: Border.all(
+                                  color: _isLeftFoot ? exerciseColor : Colors.grey,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/footprint_l.png',
+                                  width: 40,
+                                  height: 60,
+                                  color: _isLeftFoot ? exerciseColor : Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '左脚',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _isLeftFoot ? exerciseColor : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 40),
+                        // 右脚
+                        Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: !_isLeftFoot
+                                    ? exerciseColor.withAlpha(25)
+                                    : Colors.grey.withAlpha(25),
+                                border: Border.all(
+                                  color: !_isLeftFoot ? exerciseColor : Colors.grey,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/footprint_r.png',
+                                  width: 40,
+                                  height: 60,
+                                  color: !_isLeftFoot ? exerciseColor : Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '右脚',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: !_isLeftFoot ? exerciseColor : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 32),
                   ],
                 ),
