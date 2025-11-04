@@ -142,6 +142,32 @@ class ProfileScreen extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(
+                    Icons.settings,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    '项目设置',
+                    style: AppTheme.titleMedium(context).copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '设置通用训练参数，如休息时长等',
+                    style: AppTheme.bodyMedium(context).copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () {
+                    context.go('/project-settings');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
                     Icons.palette,
                     color: Theme.of(context).colorScheme.primary,
                   ),

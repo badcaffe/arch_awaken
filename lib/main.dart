@@ -20,6 +20,7 @@ import 'screens/training_introduction_screen.dart';
 import 'screens/foot_ball_rolling_screen.dart';
 import 'screens/group_timer_screen.dart';
 import 'screens/training_interval_screen.dart';
+import 'screens/project_settings_screen.dart';
 
 void main() {
   runApp(const ArchAwakenApp());
@@ -82,6 +83,12 @@ class ArchAwakenApp extends StatelessWidget {
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
                 return GroupTimerScreen(exerciseId: exerciseId);
+              },
+            ),
+            GoRoute(
+              path: 'project-settings',
+              builder: (BuildContext context, GoRouterState state) {
+                return const ProjectSettingsScreen();
               },
             ),
             GoRoute(

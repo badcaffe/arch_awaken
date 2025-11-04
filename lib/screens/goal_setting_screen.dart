@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/goal_model.dart';
 
@@ -12,24 +13,35 @@ class GoalSettingScreen extends StatefulWidget {
 
 class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProviderStateMixin {
   late TabController _tabController;
+  bool _showInstantEffectTip = true;
   final Map<String, TextEditingController> _targetCountControllers = {};
   final Map<String, TextEditingController> _targetSecondsControllers = {};
   final Map<String, TextEditingController> _leftTargetControllers = {};
   final Map<String, TextEditingController> _rightTargetControllers = {};
   final Map<String, TextEditingController> _restIntervalControllers = {};
   final Map<String, TextEditingController> _setsControllers = {};
-  final Map<String, TextEditingController> _countIntervalControllers = {};
-  final Map<String, TextEditingController> _prepareIntervalControllers = {};
   final Map<String, TextEditingController> _leftRightSecondsControllers = {};
   final Map<String, TextEditingController> _frontBackSecondsControllers = {};
   final Map<String, TextEditingController> _heelSecondsControllers = {};
-  final Map<String, TextEditingController> _trainingIntervalControllers = {};
 
   @override
   void initState() {
     super.initState();
     // Initialize with length 0, will be updated in build
     _tabController = TabController(length: 0, vsync: this);
+    _loadInstantEffectTipStatus();
+  }
+
+  Future<void> _loadInstantEffectTipStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _showInstantEffectTip = prefs.getBool('show_instant_effect_tip') ?? true;
+    });
+  }
+
+  Future<void> _saveInstantEffectTipStatus(bool show) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('show_instant_effect_tip', show);
   }
 
   @override
@@ -58,18 +70,12 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           () => TextEditingController(text: goal.restInterval.toString()));
       _setsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.sets.toString()));
-      _countIntervalControllers.putIfAbsent(goal.exerciseId,
-          () => TextEditingController(text: goal.countInterval.toString()));
-      _prepareIntervalControllers.putIfAbsent(goal.exerciseId,
-          () => TextEditingController(text: goal.prepareInterval.toString()));
       _leftRightSecondsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.leftRightSeconds.toString()));
       _frontBackSecondsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.frontBackSeconds.toString()));
       _heelSecondsControllers.putIfAbsent(goal.exerciseId,
           () => TextEditingController(text: goal.heelSeconds.toString()));
-      _trainingIntervalControllers.putIfAbsent(goal.exerciseId,
-          () => TextEditingController(text: goal.trainingInterval.toString()));
     }
   }
 
@@ -95,12 +101,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
     for (final controller in _setsControllers.values) {
       controller.dispose();
     }
-    for (final controller in _countIntervalControllers.values) {
-      controller.dispose();
-    }
-    for (final controller in _prepareIntervalControllers.values) {
-      controller.dispose();
-    }
     for (final controller in _leftRightSecondsControllers.values) {
       controller.dispose();
     }
@@ -108,9 +108,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       controller.dispose();
     }
     for (final controller in _heelSecondsControllers.values) {
-      controller.dispose();
-    }
-    for (final controller in _trainingIntervalControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -147,9 +144,72 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           tabs: goals.map((goal) => Tab(text: goal.exerciseName)).toList(),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: goals.map((goal) => _buildExerciseGoalSettings(goal)).toList(),
+      body: Column(
+        children: [
+          // 改动即时生效提示
+          if (_showInstantEffectTip) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '改动即时生效',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      size: 18,
+                    ),
+                    onPressed: () async {
+                      await _saveInstantEffectTipStatus(false);
+                      setState(() {
+                        _showInstantEffectTip = false;
+                      });
+                    },
+                    tooltip: '关闭提示',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          // 设置内容
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: goals.map((goal) => _buildExerciseGoalSettings(goal)).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -188,36 +248,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Save Button
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('目标设置已保存')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  '保存目标设置',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
             ),
           ),
         ),
@@ -538,130 +568,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
         ),
         const SizedBox(height: 16),
 
-        // Training Interval (训练间隔)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '训练项目间隔',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '按顺序训练时，项目之间的休息时间',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '训练项目间隔',
-                    border: OutlineInputBorder(),
-                    suffixText: '秒',
-                  ),
-                  controller: _trainingIntervalControllers[goal.exerciseId],
-                  onChanged: (value) {
-                    final interval = int.tryParse(value) ?? goal.trainingInterval;
-                    goalModel.setTrainingInterval(goal.exerciseId, interval);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Count Interval (计数中)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '计数中时长',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '每次计数阶段的时间长度',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '计数中时长',
-                    border: OutlineInputBorder(),
-                    suffixText: '秒',
-                  ),
-                  controller: _countIntervalControllers[goal.exerciseId],
-                  onChanged: (value) {
-                    final interval = int.tryParse(value) ?? goal.countInterval;
-                    goalModel.setCountInterval(goal.exerciseId, interval);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Prepare Interval (准备中)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '准备中时长',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '每次准备阶段的时间长度',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '准备中时长',
-                    border: OutlineInputBorder(),
-                    suffixText: '秒',
-                  ),
-                  controller: _prepareIntervalControllers[goal.exerciseId],
-                  onChanged: (value) {
-                    final interval = int.tryParse(value) ?? goal.prepareInterval;
-                    goalModel.setPrepareInterval(goal.exerciseId, interval);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -731,36 +637,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Save Button
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('目标设置已保存')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  '保存目标设置',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
             ),
           ),
         ),
@@ -846,46 +722,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
         ),
         const SizedBox(height: 16),
 
-        // Training Interval (训练间隔)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '训练项目间隔',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '按顺序训练时，项目之间的休息时间',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: '训练项目间隔',
-                    border: OutlineInputBorder(),
-                    suffixText: '秒',
-                  ),
-                  controller: _trainingIntervalControllers[goal.exerciseId],
-                  onChanged: (value) {
-                    final interval = int.tryParse(value) ?? goal.trainingInterval;
-                    goalModel.setTrainingInterval(goal.exerciseId, interval);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
