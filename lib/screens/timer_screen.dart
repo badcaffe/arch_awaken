@@ -205,65 +205,88 @@ class _TimerScreenState extends State<TimerScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-            // 状态指示器
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: exercise.color.withAlpha(25),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: exercise.color, width: 2),
-              ),
-              child: Text(
-                _isRunning ? '训练中' : (_remainingTime == _initialTime ? '准备开始' : '暂停中'),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: exercise.color,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
+      body: Column(
+        children: [
+          // 可滚动的内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 状态指示器
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: exercise.color.withAlpha(25),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: exercise.color, width: 2),
+                      ),
+                      child: Text(
+                        _isRunning ? '训练中' : (_remainingTime == _initialTime ? '准备开始' : '暂停中'),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: exercise.color,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: exercise.color.withAlpha(25),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: exercise.color,
-                  width: 4,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  _formatTime(_remainingTime),
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: exercise.color,
-                  ),
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: exercise.color.withAlpha(25),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: exercise.color,
+                          width: 4,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _formatTime(_remainingTime),
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: exercise.color,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      exercise.description,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            Text(
-              exercise.description,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
+          ),
+
+          // 底部固定的控制按钮区域
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
-            const SizedBox(height: 40),
-            Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 if (!_isRunning && _remainingTime == _initialTime)
@@ -311,9 +334,8 @@ class _TimerScreenState extends State<TimerScreen> {
                 ),
               ],
             ),
-          ],
-        ),
-        ),
+          ),
+        ],
       ),
     );
   }

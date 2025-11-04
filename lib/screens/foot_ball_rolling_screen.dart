@@ -283,16 +283,6 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
     }
   }
 
-  String _getRollingTypeName(RollingType type) {
-    switch (type) {
-      case RollingType.leftRight:
-        return '左右滚动';
-      case RollingType.frontBack:
-        return '前后滚动';
-      case RollingType.heel:
-        return '脚后跟滚动';
-    }
-  }
 
 
   @override
@@ -328,95 +318,116 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-            const SizedBox(height: 20),
+      body: Column(
+        children: [
+          // 可滚动的内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
 
-            // 状态指示器
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: exerciseColor.withAlpha(25),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: exerciseColor, width: 2),
-              ),
-              child: Text(
-                _isRunning ? '训练中' : '准备开始',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: exerciseColor,
+                    // 状态指示器
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: exerciseColor.withAlpha(25),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: exerciseColor, width: 2),
+                      ),
+                      child: Text(
+                        _isRunning ? '训练中' : '准备开始',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: exerciseColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 进度指示器
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (index) {
+                        final isCurrent = index == _currentRollingType.index;
+                        final isCompleted = index < _currentRollingType.index;
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? Colors.green
+                                : isCurrent
+                                    ? exerciseColor
+                                    : Colors.grey[300],
+                            shape: BoxShape.circle,
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 计时器显示
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: exerciseColor.withAlpha(25),
+                        border: Border.all(
+                          color: exerciseColor,
+                          width: 4,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$_remainingTime',
+                            style: TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: exerciseColor,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '秒',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: exerciseColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // 进度指示器
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
-                final isCurrent = index == _currentRollingType.index;
-                final isCompleted = index < _currentRollingType.index;
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? Colors.green
-                        : isCurrent
-                            ? exerciseColor
-                            : Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 20),
-
-            // 计时器显示
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: exerciseColor.withAlpha(25),
-                border: Border.all(
-                  color: exerciseColor,
-                  width: 4,
+          // 底部固定的控制按钮区域
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
                 ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '$_remainingTime',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: exerciseColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '秒',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: exerciseColor,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-            const SizedBox(height: 32),
-
-            // 控制按钮
-            Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 if (!_isRunning)
@@ -454,152 +465,10 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
                 ),
               ],
             ),
-
-            const SizedBox(height: 24),
-
-            // 训练进度
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      '训练进度',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildProgressIndicator(
-                          '左脚',
-                          _isLeftFoot ? 1.0 : 0.0,
-                          Colors.blue,
-                        ),
-                        _buildProgressIndicator(
-                          '右脚',
-                          _isLeftFoot ? 0.0 : 1.0,
-                          Colors.red,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildRollingTypeIndicator(
-                          RollingType.leftRight,
-                          _currentRollingType,
-                        ),
-                        _buildRollingTypeIndicator(
-                          RollingType.frontBack,
-                          _currentRollingType,
-                        ),
-                        _buildRollingTypeIndicator(
-                          RollingType.heel,
-                          _currentRollingType,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProgressIndicator(String label, double progress, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withAlpha(progress > 0 ? 100 : 25),
-            border: Border.all(
-              color: color,
-              width: 2,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              progress > 0 ? '✓' : '',
-              style: TextStyle(
-                fontSize: 24,
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRollingTypeIndicator(RollingType type, RollingType currentType) {
-    final isCompleted = _getRollingTypeIndex(type) < _getRollingTypeIndex(currentType);
-    final isCurrent = type == currentType;
-    final color = isCompleted || isCurrent
-        ? Theme.of(context).colorScheme.primary
-        : Colors.grey;
-
-    return Column(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withAlpha(isCompleted ? 100 : 25),
-            border: Border.all(
-              color: color,
-              width: isCurrent ? 3 : 1,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              _getRollingTypeIndex(type).toString(),
-              style: TextStyle(
-                fontSize: 16,
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          _getRollingTypeName(type).substring(0, 2),
-          style: TextStyle(
-            fontSize: 10,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-
-  int _getRollingTypeIndex(RollingType type) {
-    switch (type) {
-      case RollingType.leftRight:
-        return 1;
-      case RollingType.frontBack:
-        return 2;
-      case RollingType.heel:
-        return 3;
-    }
-  }
 }

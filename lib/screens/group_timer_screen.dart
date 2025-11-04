@@ -319,18 +319,45 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-            if (_isEditingSettings) ..._buildSettingsSection(exercise),
-            if (!_isEditingSettings) ..._buildTimerSection(exercise),
-          ],
-        ),
-        ),
+      body: Column(
+        children: [
+          // 可滚动的内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (_isEditingSettings) ..._buildSettingsSection(exercise),
+                    if (!_isEditingSettings) ..._buildTimerSection(exercise),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // 底部固定的控制按钮区域
+          if (!_isEditingSettings)
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: _buildControlButtons(exercise),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -456,12 +483,6 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         ),
       ),
       const SizedBox(height: 20),
-
-      // 控制按钮
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _buildControlButtons(exercise),
-      ),
     ];
   }
 

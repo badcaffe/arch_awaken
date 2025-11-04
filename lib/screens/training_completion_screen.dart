@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/training_model.dart';
@@ -35,6 +36,11 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
+  // Countdown timer for sequential training
+  Timer? _countdownTimer;
+  int _countdownValue = 10; // 10 seconds countdown
+  bool _isCountdownActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -64,12 +70,58 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
     );
 
     _controller.forward();
+
+    // Start countdown timer if in sequential mode and next training is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+      if (trainingModel.isSequentialMode && widget.onNextTraining != null) {
+        _startCountdownTimer();
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCountdownTimer() {
+    setState(() {
+      _isCountdownActive = true;
+      _countdownValue = 10;
+    });
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _countdownValue--;
+      });
+
+      if (_countdownValue <= 0) {
+        timer.cancel();
+        _autoStartNextTraining();
+      }
+    });
+  }
+
+  void _stopCountdownTimer() {
+    _countdownTimer?.cancel();
+    setState(() {
+      _isCountdownActive = false;
+    });
+  }
+
+  void _autoStartNextTraining() {
+    if (widget.onNextTraining != null) {
+      widget.onNextTraining!();
+    }
   }
 
   String _formatDuration(int seconds) {
@@ -182,6 +234,7 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                           ),
                         ),
                         const SizedBox(height: 20),
+
                         // Stats grid
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -226,7 +279,10 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                               // Next training button for sequential training
                               if (trainingModel.isSequentialMode)
                                 ElevatedButton(
-                                  onPressed: widget.onNextTraining,
+                                  onPressed: () {
+                                    _stopCountdownTimer();
+                                    widget.onNextTraining!();
+                                  },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: color,
                                   foregroundColor: Colors.white,
@@ -236,12 +292,16 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                                   elevation: 4,
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.arrow_forward, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('开始下一训练项目'),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _isCountdownActive
+                                          ? '开始下一训练项目 ($_countdownValue)'
+                                          : '开始下一训练项目',
+                                    ),
                                   ],
                                 ),
                               ),

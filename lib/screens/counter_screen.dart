@@ -570,231 +570,258 @@ class _CounterScreenState extends State<CounterScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-              // 状态指示器 - 显示当前组数
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: displayColor.withAlpha(25),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: displayColor, width: 2),
-                ),
-                child: Text(
-                  _getCounterStateText(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: displayColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // 进度指示器 - 显示组数进度
-              if (_currentSet > 0)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_totalSets, (index) {
-                    final isCurrent = index + 1 == _currentSet;
-                    final isCompleted = index + 1 < _currentSet;
-
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: isCompleted
-                            ? Colors.green
-                            : isCurrent
-                                ? displayColor
-                                : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                    );
-                  }),
-                ),
-              if (_currentSet > 0)
-                const SizedBox(height: 20),
-
-              // Main display
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: displayColor.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: displayColor,
-                        width: 4,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        displayValue.toString(),
-                        style: TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
-                          color: displayColor,
+      body: Column(
+        children: [
+          // 可滚动的内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // 状态指示器 - 显示当前组数
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: displayColor.withAlpha(25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: displayColor, width: 2),
+                        ),
+                        child: Text(
+                          _getCounterStateText(),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: displayColor,
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+
+                      // 进度指示器 - 显示组数进度
+                      if (_currentSet > 0)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(_totalSets, (index) {
+                            final isCurrent = index + 1 == _currentSet;
+                            final isCompleted = index + 1 < _currentSet;
+
+                            return Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: isCompleted
+                                    ? Colors.green
+                                    : isCurrent
+                                        ? displayColor
+                                        : Colors.grey[300],
+                                shape: BoxShape.circle,
+                              ),
+                            );
+                          }),
+                        ),
+                      if (_currentSet > 0)
+                        const SizedBox(height: 20),
+
+                      // Main display
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              color: displayColor.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: displayColor,
+                                width: 4,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                displayValue.toString(),
+                                style: TextStyle(
+                                  fontSize: 64,
+                                  fontWeight: FontWeight.bold,
+                                  color: displayColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            _getPhaseText(),
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: displayColor,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            _getPhaseDescription(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // 训练信息 - 显示当前次数和总完成次数
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '第$_currentRep/$_repsPerSet次',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: displayColor,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '总完成: $_count 次',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        exercise.description,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _getPhaseText(),
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: displayColor,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _getPhaseDescription(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // 训练信息 - 显示当前次数和总完成次数
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '第$_currentRep/$_repsPerSet次',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: displayColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '总完成: $_count 次',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                exercise.description,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 40),
-              // Control buttons
-              if (!_isRunning && _count == 0)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      onPressed: _startTraining,
-                      icon: const Icon(Icons.play_arrow),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _resetTraining,
-                      icon: const Icon(Icons.refresh),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                  ],
-                )
-              else if (_isRunning)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      onPressed: _pauseTraining,
-                      icon: const Icon(Icons.pause),
-                      style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFF00695C),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _resetTraining,
-                      icon: const Icon(Icons.refresh),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                  ],
-                )
-              else if (!_isRunning && _count > 0)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      onPressed: _resumeTraining,
-                      icon: const Icon(Icons.play_arrow),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _completeTraining,
-                      icon: const Icon(Icons.check),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: _resetTraining,
-                      icon: const Icon(Icons.refresh),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.all(16),
-                        iconSize: 32,
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+
+          // 底部固定的控制按钮区域
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
                 ),
-            ],
+              ],
+            ),
+            child: _buildControlButtons(),
           ),
-          ),
-        ),
+        ],
       ),
     );
+  }
+
+  Widget _buildControlButtons() {
+    if (!_isRunning && _count == 0) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            onPressed: _startTraining,
+            icon: const Icon(Icons.play_arrow),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+          IconButton(
+            onPressed: _resetTraining,
+            icon: const Icon(Icons.refresh),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+        ],
+      );
+    } else if (_isRunning) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            onPressed: _pauseTraining,
+            icon: const Icon(Icons.pause),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF00695C),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+          IconButton(
+            onPressed: _resetTraining,
+            icon: const Icon(Icons.refresh),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+        ],
+      );
+    } else if (!_isRunning && _count > 0) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+            onPressed: _resumeTraining,
+            icon: const Icon(Icons.play_arrow),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+          IconButton(
+            onPressed: _completeTraining,
+            icon: const Icon(Icons.check),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+          IconButton(
+            onPressed: _resetTraining,
+            icon: const Icon(Icons.refresh),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+              iconSize: 32,
+            ),
+          ),
+        ],
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   String _getCounterStateText() {

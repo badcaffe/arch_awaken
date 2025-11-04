@@ -27,7 +27,7 @@ class TrainingListScreen extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 1.0,
+            childAspectRatio: 0.9,
           ),
           itemCount: exercises.length,
           itemBuilder: (context, index) {
@@ -41,38 +41,41 @@ class TrainingListScreen extends StatelessWidget {
 
   Widget _buildExerciseCard(BuildContext context, TrainingExercise exercise) {
     return Card(
-      elevation: 4,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: InkWell(
         onTap: () {
           context.go('/training-introduction/${exercise.id}');
         },
-        borderRadius: BorderRadius.circular(12),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        splashColor: exercise.color.withAlpha(30),
+        highlightColor: exercise.color.withAlpha(20),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: exercise.color.withAlpha(25),
+                  color: exercise.color.withAlpha(15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   exercise.icon,
-                  size: 36,
+                  size: 32,
                   color: exercise.color,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 exercise.name,
                 style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -83,9 +86,9 @@ class TrainingListScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: exercise.type == ExerciseType.timer
-                      ? Colors.blue.withAlpha(25)
-                      : Colors.green.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
+                      ? Colors.blue.withAlpha(15)
+                      : Colors.green.withAlpha(15),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   exercise.type == ExerciseType.timer ? '计时' : '计次',
@@ -94,7 +97,7 @@ class TrainingListScreen extends StatelessWidget {
                     color: exercise.type == ExerciseType.timer
                         ? Colors.blue
                         : Colors.green,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

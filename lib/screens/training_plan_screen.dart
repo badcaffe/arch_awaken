@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
-import '../models/theme_model.dart';
+import '../models/theme_model.dart' hide AppTheme;
 import '../models/goal_model.dart';
 import '../models/today_exercises_model.dart';
+import '../theme/app_theme.dart';
 
 class TrainingPlanScreen extends StatefulWidget {
   const TrainingPlanScreen({super.key});
@@ -125,64 +126,58 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
+            // 进度卡片
+            Container(
+              decoration: AppTheme.cardDecoration(context),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '今日进度',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      style: AppTheme.headlineSmall(context).copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.grey[200],
-                      color: Colors.green,
-                      minHeight: 8,
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16.0),
+                    AppTheme.progressIndicator(value: progress, context: context),
+                    const SizedBox(height: 8.0),
                     Text(
                       '$completedCount/$totalCount 项已完成',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      style: AppTheme.bodyMedium(context).copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24.0),
 
             // 按顺序开始所有训练项目的按钮
             if (trainingPlan.isNotEmpty)
-              Card(
+              Container(
+                decoration: AppTheme.cardDecoration(context),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         '完整训练流程',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: AppTheme.headlineSmall(context).copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16.0),
                       Text(
                         '按顺序完成所有$totalCount个训练项目，每个项目之间自动间隔休息',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                        style: AppTheme.bodyMedium(context).copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 16.0),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -190,16 +185,16 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                             _startSequentialTraining(context, trainingPlan);
                             final trainingModel = Provider.of<TrainingModel>(context, listen: false);
                             final todayExercisesModel = Provider.of<TodayExercisesModel>(context, listen: false);
-       
+
                             // Set sequential mode and start training
                             trainingModel.setSequentialMode(true);
                             trainingModel.startSequentialTraining(todayExercisesModel.selectedExerciseIds);
-       
+
                             // Navigate to first exercise
                             if (todayExercisesModel.selectedExerciseIds.isNotEmpty) {
                               final firstExerciseId = todayExercisesModel.selectedExerciseIds.first;
                               final exercise = trainingModel.getExerciseById(firstExerciseId);
-              
+
                               if (exercise != null) {
                                 if (firstExerciseId == 'foot_ball_rolling') {
                                   context.go('/foot-ball-rolling/$firstExerciseId');
@@ -215,16 +210,12 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                               }
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+                          style: AppTheme.primaryButtonStyle(context),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.play_arrow),
-                              SizedBox(width: 8),
+                              SizedBox(width: 8.0),
                               Text(
                                 '按顺序开始所有训练',
                                 style: TextStyle(fontSize: 16),
@@ -238,15 +229,13 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                 ),
               ),
 
-            const SizedBox(height: 20),
-            const Text(
+            Text(
               '训练目标',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              style: AppTheme.headlineSmall(context).copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
                 itemCount: trainingPlan.length,
@@ -275,8 +264,9 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                     color: themeModel.getExerciseColor(baseExercise.id),
                   );
 
-                  return Card(
+                  return Container(
                     margin: const EdgeInsets.only(bottom: 8),
+                    decoration: AppTheme.cardDecoration(context),
                     child: ListTile(
                       leading: Container(
                         padding: const EdgeInsets.all(8),
@@ -289,11 +279,19 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                           color: exercise.color,
                         ),
                       ),
-                      title: Text(exercise.name),
+                      title: Text(
+                        exercise.name,
+                        style: AppTheme.titleMedium(context).copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                       subtitle: Text(
                         exercise.type == ExerciseType.timer
                             ? '目标: $target秒'
                             : '目标: $target次 × $sets',
+                        style: AppTheme.bodyMedium(context).copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       trailing: completed
                           ? ElevatedButton(
@@ -311,13 +309,9 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                                   context.go('/counter/$exerciseId');
                                 }
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                              ),
+                              style: AppTheme.secondaryButtonStyle(context),
                               child: const Text(
                                 '重新开始',
-                                style: TextStyle(fontSize: 16),
                               ),
                             )
                           : ElevatedButton(
@@ -335,13 +329,9 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                                   context.go('/counter/$exerciseId');
                                 }
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                              ),
+                              style: AppTheme.primaryButtonStyle(context),
                               child: const Text(
                                 '开始训练',
-                                style: TextStyle(fontSize: 16),
                               ),
                             ),
                     ),
