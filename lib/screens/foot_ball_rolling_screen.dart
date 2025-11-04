@@ -407,7 +407,7 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 64),
 
                     // 左右脚图形示意
                     Row(
@@ -449,7 +449,7 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(width: 40),
+                        const SizedBox(width: 80),
                         // 右脚
                         Column(
                           children: [
