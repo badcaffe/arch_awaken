@@ -25,6 +25,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
   final Map<String, TextEditingController> _leftRightSecondsControllers = {};
   final Map<String, TextEditingController> _frontBackSecondsControllers = {};
   final Map<String, TextEditingController> _heelSecondsControllers = {};
+  final Map<String, TextEditingController> _longPressDurationControllers = {};
 
   @override
   void initState() {
@@ -80,6 +81,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
             () => TextEditingController(text: goal.frontBackSeconds.toString()));
         _heelSecondsControllers.putIfAbsent(goal.exerciseId,
             () => TextEditingController(text: goal.heelSeconds.toString()));
+        _longPressDurationControllers.putIfAbsent(goal.exerciseId,
+            () => TextEditingController(text: goal.longPressDuration.toString()));
       }
     }
   }
@@ -119,6 +122,9 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       controller.dispose();
     }
     for (final controller in _heelSecondsControllers.values) {
+      controller.dispose();
+    }
+    for (final controller in _longPressDurationControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -601,6 +607,81 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
           ),
         if (goal.hasLeftRight && goal.exerciseId != 'foot_ball_rolling')
           const SizedBox(height: 16),
+
+        // Count Mode Settings (for yoga_brick_ball_pickup only)
+        if (goal.exerciseId == 'yoga_brick_ball_pickup')
+          Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '计次模式设置',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '选择短按立即计次，或长按确认后计次',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Count Mode Selection
+                  Row(
+                    children: [
+                      const Text('计次模式: '),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SegmentedButton<String>(
+                          segments: const [
+                            ButtonSegment(
+                              value: 'tap',
+                              label: Text('短按'),
+                              icon: Icon(Icons.touch_app),
+                            ),
+                            ButtonSegment(
+                              value: 'longPress',
+                              label: Text('长按'),
+                              icon: Icon(Icons.touch_app_outlined),
+                            ),
+                          ],
+                          selected: {goal.countMode},
+                          onSelectionChanged: (Set<String> selected) {
+                            goalModel.setCountMode(goal.exerciseId, selected.first);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Long Press Duration (only show in long press mode)
+                  if (goal.countMode == 'longPress') ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '长按确认时长',
+                        border: OutlineInputBorder(),
+                        suffixText: '秒',
+                        helperText: '长按超过此时长后计次加一',
+                      ),
+                      controller: _longPressDurationControllers[goal.exerciseId],
+                      onChanged: (value) {
+                        final duration = int.tryParse(value) ?? goal.longPressDuration;
+                        goalModel.setLongPressDuration(goal.exerciseId, duration);
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
 
         // Add spacing before foot_ball_rolling card
         if (goal.exerciseId == 'foot_ball_rolling')

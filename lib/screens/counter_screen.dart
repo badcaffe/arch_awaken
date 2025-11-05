@@ -50,6 +50,17 @@ class _CounterScreenState extends State<CounterScreen> {
   // 训练模型引用
   late TrainingModel _trainingModel;
 
+  // 长按计次相关（用于瑜伽砖捡球）
+  bool _isLongPressing = false;
+  Timer? _longPressTimer;
+  int _longPressProgress = 0;
+  String _countMode = 'longPress'; // 计次模式: 'tap' 或 'longPress'
+  int _longPressDuration = 3; // 长按时长（秒），从设置中读取
+  bool _isLeftFoot = true; // 当前是否为左脚（用于瑜伽砖捡球）
+
+  // 点击动画相关
+  double _circleScale = 1.0;
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +71,8 @@ class _CounterScreenState extends State<CounterScreen> {
     _totalSets = goal?.sets ?? 3;
     _countInterval = goal?.countInterval ?? 5;
     _prepareInterval = goal?.prepareInterval ?? 1;
+    _countMode = goal?.countMode ?? 'longPress';
+    _longPressDuration = goal?.longPressDuration ?? 3;
 
     // Check if we're in sequential training mode and auto-start
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -75,6 +88,7 @@ class _CounterScreenState extends State<CounterScreen> {
     _countdownTimer?.cancel();
     _autoCounterTimer?.cancel();
     _trainingTimer?.cancel();
+    _longPressTimer?.cancel();
     _soundService.dispose();
     super.dispose();
   }
@@ -100,6 +114,7 @@ class _CounterScreenState extends State<CounterScreen> {
       _totalSets = sets;
       _countInterval = countInterval;
       _prepareInterval = prepareInterval;
+      _isLeftFoot = true; // 开始时重置为左脚
     });
 
     _startCountdown();
@@ -130,6 +145,11 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   void _startAutoCounter() {
+    // 瑜伽砖捡球使用长按计次，不使用自动计数
+    if (widget.exerciseId == 'yoga_brick_ball_pickup') {
+      return;
+    }
+
     _currentPhaseValue = 1;
     _isPreparing = false;
     _isResting = false;
@@ -252,12 +272,210 @@ class _CounterScreenState extends State<CounterScreen> {
       _trainingDuration = 0;
       _currentSet = 1;
       _currentRep = 0;
+      _isLongPressing = false;
+      _longPressProgress = 0;
+      _isLeftFoot = true; // 重置为左脚
     });
     _countdownTimer?.cancel();
     _autoCounterTimer?.cancel();
     _trainingTimer?.cancel();
     _restTimer?.cancel();
+    _longPressTimer?.cancel();
     _soundService.stopAllSounds();
+  }
+
+  // 长按开始（仅长按模式）
+  void _onLongPressStart() {
+    if (!_isRunning || widget.exerciseId != 'yoga_brick_ball_pickup' || _countMode != 'longPress' || _isResting || _isCountingDown) {
+      return;
+    }
+
+    setState(() {
+      _isLongPressing = true;
+      _longPressProgress = 0;
+    });
+
+    _longPressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _longPressProgress += 100;
+
+        // 每秒播放一次声音反馈
+        if (_longPressProgress % 1000 == 0) {
+          _soundService.playNumberSound(_longPressProgress ~/ 1000);
+        }
+
+        // 长按超过设定时长，计次加一
+        if (_longPressProgress >= _longPressDuration * 1000) {
+          _onLongPressComplete();
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  // 短按计次（仅短按模式）
+  void _onTap() {
+    if (!_isRunning || widget.exerciseId != 'yoga_brick_ball_pickup' || _countMode != 'tap' || _isResting || _isCountingDown) {
+      return;
+    }
+
+    // 触发点击动画
+    _animateCircleTap();
+
+    setState(() {
+      _count++;
+      _currentRep++;
+    });
+
+    // 播放成功声音
+    _soundService.playGuduSound();
+
+    // 检查是否完成当前脚的训练
+    if (_currentRep >= _repsPerSet) {
+      // 切换到另一只脚
+      if (_isLeftFoot) {
+        setState(() {
+          _isLeftFoot = false;
+          _currentRep = 0;
+        });
+        // 切换脚时不播放声音
+      } else {
+        // 两只脚都完成，重置到左脚并进入组间休息
+        setState(() {
+          _isLeftFoot = true;
+          _currentRep = 0;
+        });
+
+        // 检查是否完成所有组
+        if (_currentSet >= _totalSets) {
+          // 完成所有训练
+          print('🎯 完成所有训练: $_totalSets 组, 每组 $_repsPerSet 次');
+          _pauseTraining();
+          _completeTraining();
+        } else {
+          // 进入组间休息
+          setState(() {
+            _currentSet++;
+            _isResting = true;
+            _countdownValue = _restBetweenSets;
+          });
+          _soundService.playRestStartSound();
+          _startRestTimer();
+        }
+      }
+    }
+  }
+
+  // 长按结束（未达到3秒）
+  void _onLongPressEnd() {
+    _longPressTimer?.cancel();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLongPressing = false;
+      _longPressProgress = 0;
+    });
+  }
+
+  // 长按完成（达到设定时长）
+  void _onLongPressComplete() {
+    _longPressTimer?.cancel();
+
+    if (!mounted) return;
+
+    // 触发完成动画
+    _animateCircleTap();
+
+    setState(() {
+      _isLongPressing = false;
+      _longPressProgress = 0;
+      _count++;
+      _currentRep++;
+    });
+
+    // 播放成功声音
+    _soundService.playGuduSound();
+
+    // 检查是否完成当前脚的训练
+    if (_currentRep >= _repsPerSet) {
+      // 切换到另一只脚
+      if (_isLeftFoot) {
+        setState(() {
+          _isLeftFoot = false;
+          _currentRep = 0;
+        });
+        // 切换脚时不播放声音
+      } else {
+        // 两只脚都完成，重置到左脚并进入组间休息
+        setState(() {
+          _isLeftFoot = true;
+          _currentRep = 0;
+        });
+
+        // 检查是否完成所有组
+        if (_currentSet >= _totalSets) {
+          // 完成所有训练
+          print('🎯 完成所有训练: $_totalSets 组, 每组 $_repsPerSet 次');
+          _pauseTraining();
+          _completeTraining();
+        } else {
+          // 进入组间休息
+          setState(() {
+            _currentSet++;
+            _isResting = true;
+            _countdownValue = _restBetweenSets;
+          });
+          _soundService.playRestStartSound();
+          _startRestTimer();
+        }
+      }
+    }
+  }
+
+  // 组间休息计时器
+  void _startRestTimer() {
+    _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        if (_countdownValue > 1) {
+          _countdownValue--;
+        } else {
+          // 休息结束
+          _isResting = false;
+          _countdownValue = 5;
+          _soundService.playRestEndSound();
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  // 点击动画效果
+  void _animateCircleTap() {
+    if (!mounted) return;
+
+    setState(() {
+      _circleScale = 0.9; // 缩小到90%
+    });
+
+    // 200ms后恢复原大小
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        setState(() {
+          _circleScale = 1.0;
+        });
+      }
+    });
   }
 
   void _completeTraining() {
@@ -479,6 +697,22 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String _getPhaseText() {
+    if (widget.exerciseId == 'yoga_brick_ball_pickup') {
+      if (_isResting) {
+        return '组间休息';
+      } else if (_isCountingDown) {
+        return '准备开始';
+      } else if (_isLongPressing) {
+        return '长按中';
+      } else {
+        if (_countMode == 'tap') {
+          return '点击计次';
+        } else {
+          return '等待长按';
+        }
+      }
+    }
+
     if (_isResting) {
       return '组间休息';
     } else if (_isCountingDown) {
@@ -491,6 +725,23 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String _getPhaseDescription() {
+    if (widget.exerciseId == 'yoga_brick_ball_pickup') {
+      if (_isResting) {
+        return '第 $_currentSet 组休息 $_countdownValue 秒';
+      } else if (_isCountingDown) {
+        return '$_countdownValue 秒后开始训练';
+      } else if (_isLongPressing) {
+        final progress = (_longPressProgress / 1000).toStringAsFixed(1);
+        return '已长按 $progress/$_longPressDuration 秒';
+      } else {
+        if (_countMode == 'tap') {
+          return '点击大圆计次';
+        } else {
+          return '长按大圆 $_longPressDuration 秒计次';
+        }
+      }
+    }
+
     if (_isResting) {
       return '第 $_currentSet 组休息 $_countdownValue 秒';
     } else if (_isCountingDown) {
@@ -534,6 +785,8 @@ class _CounterScreenState extends State<CounterScreen> {
       displayColor = Colors.blue;
     } else if (_isCountingDown) {
       displayColor = const Color(0xFF00695C);
+    } else if (widget.exerciseId == 'yoga_brick_ball_pickup' && _isLongPressing) {
+      displayColor = const Color(0xFFFF6B35); // 长按时显示橙红色
     } else if (_isPreparing) {
       displayColor = const Color(0xFFEBA236);
     } else {
@@ -541,12 +794,27 @@ class _CounterScreenState extends State<CounterScreen> {
     }
 
     int displayValue;
-    if (_isResting) {
-      displayValue = _countdownValue;
-    } else if (_isCountingDown) {
-      displayValue = _countdownValue;
+    if (widget.exerciseId == 'yoga_brick_ball_pickup') {
+      // 瑜伽砖捡球显示当前次数或倒计时
+      if (_isResting) {
+        displayValue = _countdownValue;
+      } else if (_isCountingDown) {
+        displayValue = _countdownValue;
+      } else if (_isLongPressing) {
+        displayValue = (_longPressProgress / 1000).ceil();
+      } else {
+        // 训练中显示当前次数
+        displayValue = _currentRep;
+      }
     } else {
-      displayValue = _currentPhaseValue;
+      // 其他项目显示自动计数
+      if (_isResting) {
+        displayValue = _countdownValue;
+      } else if (_isCountingDown) {
+        displayValue = _countdownValue;
+      } else {
+        displayValue = _currentPhaseValue;
+      }
     }
 
     return Scaffold(
@@ -575,6 +843,10 @@ class _CounterScreenState extends State<CounterScreen> {
           // 可滚动的内容区域
           Expanded(
             child: SingleChildScrollView(
+              // 瑜伽砖捡球禁止滚动，避免长按时误触滚动
+              physics: widget.exerciseId == 'yoga_brick_ball_pickup'
+                  ? const NeverScrollableScrollPhysics()
+                  : null,
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
@@ -631,70 +903,208 @@ class _CounterScreenState extends State<CounterScreen> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: displayColor.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: displayColor,
-                                width: 4,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                displayValue.toString(),
-                                style: TextStyle(
-                                  fontSize: 64,
-                                  fontWeight: FontWeight.bold,
-                                  color: displayColor,
-                                ),
+                          GestureDetector(
+                            // 短按模式使用onTap
+                            onTap: widget.exerciseId == 'yoga_brick_ball_pickup' && _countMode == 'tap'
+                                ? _onTap
+                                : null,
+                            // 长按模式使用onLongPress
+                            onLongPressStart: widget.exerciseId == 'yoga_brick_ball_pickup' && _countMode == 'longPress'
+                                ? (_) => _onLongPressStart()
+                                : null,
+                            onLongPressEnd: widget.exerciseId == 'yoga_brick_ball_pickup' && _countMode == 'longPress'
+                                ? (_) => _onLongPressEnd()
+                                : null,
+                            child: AnimatedScale(
+                              scale: _circleScale,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // 背景圆圈
+                                  Container(
+                                    width: 250,
+                                    height: 250,
+                                    decoration: BoxDecoration(
+                                      color: displayColor.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: displayColor,
+                                        width: 4,
+                                      ),
+                                    ),
+                                  ),
+                                  // 长按进度指示器（仅瑜伽砖捡球显示）
+                                  if (widget.exerciseId == 'yoga_brick_ball_pickup' && _isLongPressing)
+                                    SizedBox(
+                                      width: 250,
+                                      height: 250,
+                                      child: CircularProgressIndicator(
+                                        value: _longPressProgress / (_longPressDuration * 1000),
+                                        strokeWidth: 8,
+                                        backgroundColor: Colors.transparent,
+                                        valueColor: AlwaysStoppedAnimation<Color>(displayColor),
+                                      ),
+                                    ),
+                                  // 显示数字
+                                  Text(
+                                    displayValue.toString(),
+                                    style: TextStyle(
+                                      fontSize: 80,
+                                      fontWeight: FontWeight.bold,
+                                      color: displayColor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Text(
-                            _getPhaseText(),
-                            style: TextStyle(
-                              fontSize: 24,
-                              color: displayColor,
+                          // 状态文字（瑜伽砖捡球不显示）
+                          if (widget.exerciseId != 'yoga_brick_ball_pickup')
+                            Text(
+                              _getPhaseText(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: displayColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            _getPhaseDescription(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
+                          if (widget.exerciseId != 'yoga_brick_ball_pickup')
+                            const SizedBox(height: 10),
+                          if (widget.exerciseId != 'yoga_brick_ball_pickup')
+                            Text(
+                              _getPhaseDescription(),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      // 训练信息 - 显示当前次数和总完成次数
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '第$_currentRep/$_repsPerSet次',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: displayColor,
+                      // 训练信息 - 显示当前次数和总完成次数（瑜伽砖捡球不显示）
+                      if (widget.exerciseId != 'yoga_brick_ball_pickup')
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '第$_currentRep/$_repsPerSet次',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: displayColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '总完成: $_count 次',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
+                            const SizedBox(height: 8),
+                            Text(
+                              '总完成: $_count 次',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
                             ),
+                          ],
+                        ),
+                      if (widget.exerciseId != 'yoga_brick_ball_pickup')
+                        const SizedBox(height: 20),
+
+                      // 左右脚图形示意（仅瑜伽砖捡球显示）
+                      if (widget.exerciseId == 'yoga_brick_ball_pickup')
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // 左脚
+                            Column(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: _isLeftFoot
+                                        ? displayColor.withAlpha(25)
+                                        : Colors.grey.withAlpha(25),
+                                    border: Border.all(
+                                      color: _isLeftFoot ? displayColor : Colors.grey,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/footprint_l.png',
+                                      width: 40,
+                                      height: 60,
+                                      color: _isLeftFoot ? displayColor : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '左脚',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isLeftFoot ? displayColor : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 80),
+                            // 右脚
+                            Column(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: !_isLeftFoot
+                                        ? displayColor.withAlpha(25)
+                                        : Colors.grey.withAlpha(25),
+                                    border: Border.all(
+                                      color: !_isLeftFoot ? displayColor : Colors.grey,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/images/footprint_r.png',
+                                      width: 40,
+                                      height: 60,
+                                      color: !_isLeftFoot ? displayColor : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '右脚',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: !_isLeftFoot ? displayColor : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      if (widget.exerciseId == 'yoga_brick_ball_pickup')
+                        const SizedBox(height: 20),
+
+                      // 总完成次数（仅瑜伽砖捡球显示）
+                      if (widget.exerciseId == 'yoga_brick_ball_pickup')
+                        Text(
+                          '总完成: $_count 次',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: displayColor,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                        ),
+                      if (widget.exerciseId == 'yoga_brick_ball_pickup')
+                        const SizedBox(height: 20),
+
                       Text(
                         exercise.description,
                         style: const TextStyle(
@@ -825,6 +1235,17 @@ class _CounterScreenState extends State<CounterScreen> {
   }
 
   String _getCounterStateText() {
+    if (widget.exerciseId == 'yoga_brick_ball_pickup') {
+      if (_isResting) {
+        return '第$_currentSet组休息';
+      } else if (_currentSet > 0) {
+        final footText = _isLeftFoot ? '左脚' : '右脚';
+        return '第$_currentSet组 - $footText';
+      } else {
+        return '准备开始';
+      }
+    }
+
     if (_isResting) {
       return '第$_currentSet组休息';
     } else if (_currentSet > 0) {

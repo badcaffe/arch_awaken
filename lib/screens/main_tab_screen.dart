@@ -21,7 +21,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
     const TrainingPlanScreen(), // 今日
     const TrainingListScreen(), // 项目
     const AchievementsScreen(),  // 成就
-    const ProfileScreen(),      // 我的
+    const ProfileScreen(),      // 设置
   ];
 
   @override
@@ -56,8 +56,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
               label: '成就',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: '我的',
+              icon: Icon(Icons.settings),
+              label: '设置',
             ),
           ],
           selectedItemColor: themeModel.currentTheme == ThemeScheme.dark

@@ -18,6 +18,8 @@ class ExerciseGoal {
   int frontBackSeconds; // 前后滚动时长（秒）
   int heelSeconds; // 脚后跟滚动时长（秒）
   int trainingInterval; // 训练项目间隔时长（秒）
+  String countMode; // 计次模式: 'tap' 短按, 'longPress' 长按
+  int longPressDuration; // 长按时长（秒）
 
   ExerciseGoal({
     required this.exerciseId,
@@ -35,6 +37,8 @@ class ExerciseGoal {
     this.frontBackSeconds = 60, // 默认60秒
     this.heelSeconds = 60, // 默认60秒
     this.trainingInterval = 30, // 默认30秒
+    this.countMode = 'longPress', // 默认长按模式
+    this.longPressDuration = 3, // 默认长按3秒
   });
 
   Map<String, dynamic> toJson() {
@@ -54,6 +58,8 @@ class ExerciseGoal {
       'frontBackSeconds': frontBackSeconds,
       'heelSeconds': heelSeconds,
       'trainingInterval': trainingInterval,
+      'countMode': countMode,
+      'longPressDuration': longPressDuration,
     };
   }
 
@@ -74,6 +80,8 @@ class ExerciseGoal {
       frontBackSeconds: json['frontBackSeconds'] ?? 60,
       heelSeconds: json['heelSeconds'] ?? 60,
       trainingInterval: json['trainingInterval'] ?? 30,
+      countMode: json['countMode'] ?? 'longPress',
+      longPressDuration: json['longPressDuration'] ?? 3,
     );
   }
 }
@@ -200,6 +208,24 @@ class GoalModel extends ChangeNotifier {
     final goal = _exerciseGoals[exerciseId];
     if (goal != null) {
       goal.trainingInterval = interval;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
+  void setCountMode(String exerciseId, String mode) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.countMode = mode;
+      _saveGoals();
+      notifyListeners();
+    }
+  }
+
+  void setLongPressDuration(String exerciseId, int duration) {
+    final goal = _exerciseGoals[exerciseId];
+    if (goal != null) {
+      goal.longPressDuration = duration;
       _saveGoals();
       notifyListeners();
     }

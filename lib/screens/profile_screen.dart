@@ -10,79 +10,54 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeModel = Provider.of<ThemeModel>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('我的'),
+        title: const Text('设置'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // User info section
+          // App Header
+          const SizedBox(height: 16),
+          // App Icon
           Container(
-            decoration: AppTheme.cardDecoration(context),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: themeModel.currentAppTheme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          themeModel.currentAppTheme.colorScheme.primary,
-                          themeModel.currentAppTheme.colorScheme.primary.withValues(alpha: 0.8),
-                        ],
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.person,
-                      size: 32,
-                      color: themeModel.currentAppTheme.colorScheme.onPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '训练者',
-                          style: AppTheme.headlineSmall(context).copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '坚持训练，足弓觉醒',
-                          style: AppTheme.bodyMedium(context).copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+            child: const Image(
+              image: AssetImage('assets/images/logo.png'),
+              width: 60,
+              height: 60,
             ),
           ),
           const SizedBox(height: 24),
-          // Settings section
-          Text(
-            '设置',
-            style: AppTheme.headlineSmall(context).copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
+          // App Name
+          const Text(
+            '足弓觉醒',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          // Version
+          Text(
+            '版本 1.0.0',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Settings section
           Container(
             decoration: AppTheme.cardDecoration(context),
             child: Column(
