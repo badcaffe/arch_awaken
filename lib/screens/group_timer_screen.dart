@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
 import '../models/goal_model.dart';
+import '../services/sound_service.dart';
 import 'training_completion_screen.dart';
 
 class GroupTimerScreen extends StatefulWidget {
@@ -184,6 +185,10 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
       count: _totalGroups,
     );
     trainingModel.addRecord(record);
+
+    // Play cheer sound
+    final soundService = SoundService();
+    soundService.playCheerSound();
 
     // Check if we're in sequential training mode
     if (trainingModel.isSequentialTrainingActive) {

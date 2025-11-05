@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
+import '../services/sound_service.dart';
 import 'training_completion_screen.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -88,6 +89,10 @@ class _TimerScreenState extends State<TimerScreen> {
       count: 1,
     );
     trainingModel.addRecord(record);
+
+    // Play cheer sound
+    final soundService = SoundService();
+    soundService.playCheerSound();
 
     // Check if we're in sequential training mode
     if (trainingModel.isSequentialTrainingActive) {

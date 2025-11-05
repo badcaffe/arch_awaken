@@ -220,6 +220,10 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
         count: 1, // 完成一次完整训练
       ),
     );
+
+    // Play cheer sound
+    final soundService = SoundService();
+    soundService.playCheerSound();
   }
 
   void _showCompletionDialog() {
