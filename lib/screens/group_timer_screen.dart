@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/training_model.dart';
 import '../models/theme_model.dart';
+import '../models/goal_model.dart';
 import 'training_completion_screen.dart';
 
 class GroupTimerScreen extends StatefulWidget {
@@ -30,8 +31,6 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   bool _isRunning = false;
   Timer? _timer;
 
-  // 设置状态
-  bool _isEditingSettings = false;
 
   @override
   void initState() {
@@ -55,9 +54,15 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   }
 
   void _loadSettings() {
-    // 这里可以加载用户保存的设置
-    // 暂时使用默认值
+    final goalModel = Provider.of<GoalModel>(context, listen: false);
+    final goal = goalModel.getGoal(widget.exerciseId);
+
     setState(() {
+      if (goal != null) {
+        _totalGroups = goal.sets;
+        _workDuration = goal.targetSeconds;
+        _restDuration = goal.restInterval;
+      }
       _remainingTime = _workDuration;
     });
   }
@@ -99,16 +104,17 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     _timer?.cancel();
 
     setState(() {
-      _isRunning = false;
-
       if (_currentState == TimerState.work) {
         // 工作计时结束，进入休息
         if (_currentGroup < _totalGroups) {
           _currentState = TimerState.rest;
           _remainingTime = _restDuration;
+          _isRunning = true; // 保持运行状态，自动开始休息计时
+          _startTimer(); // 自动开始休息计时
         } else {
           // 所有组完成
           _currentState = TimerState.completed;
+          _isRunning = false;
           _saveRecord();
         }
       } else if (_currentState == TimerState.rest) {
@@ -116,6 +122,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         _currentGroup++;
         _currentState = TimerState.work;
         _remainingTime = _workDuration;
+        _isRunning = true; // 保持运行状态，自动开始下一组工作
+        _startTimer(); // 自动开始下一组工作计时
       }
     });
   }
@@ -212,32 +220,7 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     );
   }
 
-  void _toggleSettings() {
-    setState(() {
-      _isEditingSettings = !_isEditingSettings;
-    });
-  }
 
-  void _updateWorkDuration(int duration) {
-    setState(() {
-      _workDuration = duration;
-      if (_currentState == TimerState.setup) {
-        _remainingTime = duration;
-      }
-    });
-  }
-
-  void _updateRestDuration(int duration) {
-    setState(() {
-      _restDuration = duration;
-    });
-  }
-
-  void _updateTotalGroups(int groups) {
-    setState(() {
-      _totalGroups = groups;
-    });
-  }
 
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
@@ -311,13 +294,6 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
             context.pop();
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditingSettings ? Icons.check : Icons.settings),
-            onPressed: _toggleSettings,
-            tooltip: '设置',
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -330,8 +306,7 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (_isEditingSettings) ..._buildSettingsSection(exercise),
-                    if (!_isEditingSettings) ..._buildTimerSection(exercise),
+                    ..._buildTimerSection(exercise),
                   ],
                 ),
               ),
@@ -339,76 +314,28 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
           ),
 
           // 底部固定的控制按钮区域
-          if (!_isEditingSettings)
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: _buildControlButtons(exercise),
-              ),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _buildControlButtons(exercise),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  List<Widget> _buildSettingsSection(TrainingExercise exercise) {
-    return [
-      Text(
-        '训练设置',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: exercise.color,
-        ),
-      ),
-      const SizedBox(height: 20),
-      _buildSettingItem(
-        '每组时长 (秒)',
-        _workDuration,
-        _updateWorkDuration,
-        [30, 45, 60, 90, 120],
-      ),
-      const SizedBox(height: 16),
-      _buildSettingItem(
-        '休息时长 (秒)',
-        _restDuration,
-        _updateRestDuration,
-        [15, 30, 45, 60],
-      ),
-      const SizedBox(height: 16),
-      _buildSettingItem(
-        '组数',
-        _totalGroups,
-        _updateTotalGroups,
-        [1, 2, 3, 4, 5],
-      ),
-      const SizedBox(height: 40),
-      ElevatedButton.icon(
-        onPressed: () {
-          _toggleSettings();
-          _resetTimer();
-        },
-        icon: const Icon(Icons.check),
-        label: const Text('确认设置'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: exercise.color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-        ),
-      ),
-    ];
-  }
 
   List<Widget> _buildTimerSection(TrainingExercise exercise) {
     final stateColor = _getStateColor(exercise);
@@ -434,7 +361,7 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
       const SizedBox(height: 20),
 
       // 进度指示器
-      if (_currentState != TimerState.setup && _currentState != TimerState.completed)
+      if (_currentState != TimerState.completed)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(_totalGroups, (index) {
@@ -456,7 +383,7 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
             );
           }),
         ),
-      if (_currentState != TimerState.setup && _currentState != TimerState.completed)
+      if (_currentState != TimerState.completed)
         const SizedBox(height: 20),
 
       // 主计时器
@@ -548,45 +475,6 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     return buttons;
   }
 
-  Widget _buildSettingItem(
-    String title,
-    int currentValue,
-    Function(int) onUpdate,
-    List<int> options,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: options.map((value) {
-            final isSelected = currentValue == value;
-            return ChoiceChip(
-              label: Text('$value'),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  onUpdate(value);
-                }
-              },
-              selectedColor: Colors.blue,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
 }
 
 enum TimerState {

@@ -221,17 +221,9 @@ class GoalModel extends ChangeNotifier {
           _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
             exerciseId: 'foot_ball_rolling',
             exerciseName: '脚底滚球',
-            repsPerSet: 10,
-            targetSeconds: 60,
-            restInterval: 10,
-            sets: 1,
-            hasLeftRight: true,
-            leftTarget: 60,
-            rightTarget: 60,
             leftRightSeconds: 60,
             frontBackSeconds: 60,
             heelSeconds: 60,
-            trainingInterval: 30,
           );
           _saveGoals();
         }
@@ -250,17 +242,9 @@ class GoalModel extends ChangeNotifier {
     _exerciseGoals['foot_ball_rolling'] = ExerciseGoal(
       exerciseId: 'foot_ball_rolling',
       exerciseName: '脚底滚球',
-      repsPerSet: 10,
-      targetSeconds: 60, // 默认60秒
-      restInterval: 10,
-      sets: 1,
-      hasLeftRight: true, // 区分左右脚
-      leftTarget: 60, // 左脚目标60秒
-      rightTarget: 60, // 右脚目标60秒
       leftRightSeconds: 60, // 左右滚动默认60秒
       frontBackSeconds: 60, // 前后滚动默认60秒
       heelSeconds: 60, // 脚后跟滚动默认60秒
-      trainingInterval: 30, // 默认30秒
     );
 
     _exerciseGoals['ball_tiptoe'] = ExerciseGoal(
