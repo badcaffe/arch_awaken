@@ -62,9 +62,17 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
       final exercise = trainingModel.getExerciseById(exerciseId);
 
       // Use goal target or default values
-      final target = exercise?.type == ExerciseType.timer
-          ? (goal?.targetSeconds ?? 30)
-          : (goal?.repsPerSet ?? 10);
+      int target;
+      if (exercise?.type == ExerciseType.timer) {
+        // For foot_ball_rolling, calculate total duration from all rolling types × 2 feet
+        if (exerciseId == 'foot_ball_rolling' && goal != null) {
+          target = (goal.leftRightSeconds + goal.frontBackSeconds + goal.heelSeconds) * 2;
+        } else {
+          target = goal?.targetSeconds ?? 30;
+        }
+      } else {
+        target = goal?.repsPerSet ?? 10;
+      }
 
       return {
         'exerciseId': exerciseId,

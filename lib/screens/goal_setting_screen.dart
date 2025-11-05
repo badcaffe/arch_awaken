@@ -246,6 +246,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
       children: [
         // Exercise Header
         Card(
+          margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -270,54 +271,11 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
             ),
           ),
         ),
-        const SizedBox(height: 16),
-
-        // Target Duration (for timer-based exercises)
-        if (goal.exerciseId == 'frog_pose' || goal.exerciseId == 'stretching')
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '目标时长',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '每次训练的目标持续时间',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '目标时长',
-                      border: OutlineInputBorder(),
-                      suffixText: '秒',
-                    ),
-                    controller: _targetSecondsControllers[goal.exerciseId],
-                    onChanged: (value) {
-                      final seconds = int.tryParse(value) ?? goal.targetSeconds;
-                      goalModel.setTargetSeconds(goal.exerciseId, seconds);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        const SizedBox(height: 16),
 
         // Training Sets (for all exercises except foot_ball_rolling)
         if (goal.exerciseId != 'foot_ball_rolling')
           Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -356,11 +314,100 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               ),
             ),
           ),
-        const SizedBox(height: 16),
+
+        // Duration Per Set (for frog_pose and stretching)
+        if (goal.exerciseId == 'frog_pose' || goal.exerciseId == 'stretching')
+          Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '每组时长',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '每组训练的持续时间',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '每组时长',
+                      border: OutlineInputBorder(),
+                      suffixText: '秒',
+                    ),
+                    controller: _targetSecondsControllers[goal.exerciseId],
+                    onChanged: (value) {
+                      final seconds = int.tryParse(value) ?? goal.targetSeconds;
+                      goalModel.setTargetSeconds(goal.exerciseId, seconds);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Reps Per Set (for counter-based exercises only)
+        if (goal.exerciseId == 'ball_tiptoe' ||
+            goal.exerciseId == 'yoga_brick_tiptoe' ||
+            goal.exerciseId == 'yoga_brick_ball_pickup' ||
+            goal.exerciseId == 'glute_bridge')
+          Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '每组次数',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '每组训练要完成的次数',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: '每组次数',
+                      border: OutlineInputBorder(),
+                      suffixText: '次',
+                    ),
+                    controller: _targetCountControllers[goal.exerciseId],
+                    onChanged: (value) {
+                      final repsPerSet = int.tryParse(value) ?? goal.repsPerSet;
+                      goalModel.setRepsPerSet(goal.exerciseId, repsPerSet);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
 
         // Rest Interval (for all exercises except foot_ball_rolling)
         if (goal.exerciseId != 'foot_ball_rolling')
           Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -399,11 +446,11 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               ),
             ),
           ),
-        const SizedBox(height: 16),
 
         // Count Interval (for all exercises except foot_ball_rolling)
         if (goal.exerciseId != 'foot_ball_rolling')
           Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -444,7 +491,6 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               ),
             ),
           ),
-        const SizedBox(height: 16),
 
         // Prepare Interval (for all exercises except foot_ball_rolling)
         if (goal.exerciseId != 'foot_ball_rolling')
@@ -489,11 +535,10 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               ),
             ),
           ),
-        const SizedBox(height: 16),
-
         // Left/Right Targets (for yoga_brick_ball_pickup)
         if (goal.hasLeftRight && goal.exerciseId != 'foot_ball_rolling')
           Card(
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -554,7 +599,12 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> with TickerProvid
               ),
             ),
           ),
-        const SizedBox(height: 16),
+        if (goal.hasLeftRight && goal.exerciseId != 'foot_ball_rolling')
+          const SizedBox(height: 16),
+
+        // Add spacing before foot_ball_rolling card
+        if (goal.exerciseId == 'foot_ball_rolling')
+          const SizedBox(height: 16),
 
         // Rolling Type Durations (for foot_ball_rolling)
         if (goal.exerciseId == 'foot_ball_rolling')

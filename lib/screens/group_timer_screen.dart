@@ -30,6 +30,11 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   int _remainingTime = 0;
   bool _isRunning = false;
   Timer? _timer;
+  
+  // Constants for default values
+  static const int defaultTotalGroups = 3;
+  static const int defaultWorkDuration = 60; // 60 seconds
+  static const int defaultRestDuration = 30; // 30 seconds
 
 
   @override
@@ -49,30 +54,58 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _cancelTimer();
     super.dispose();
+  }
+  
+  void _cancelTimer() {
+    _timer?.cancel();
+    _timer = null;
   }
 
   void _loadSettings() {
-    final goalModel = Provider.of<GoalModel>(context, listen: false);
-    final goal = goalModel.getGoal(widget.exerciseId);
+    try {
+      final goalModel = Provider.of<GoalModel>(context, listen: false);
+      final goal = goalModel.getGoal(widget.exerciseId);
 
-    setState(() {
-      if (goal != null) {
-        _totalGroups = goal.sets;
-        _workDuration = goal.targetSeconds;
-        _restDuration = goal.restInterval;
-      }
-      _remainingTime = _workDuration;
-    });
+      setState(() {
+        if (goal != null) {
+          _totalGroups = goal.sets > 0 ? goal.sets : defaultTotalGroups;
+          _workDuration = goal.targetSeconds > 0 ? goal.targetSeconds : defaultWorkDuration;
+          _restDuration = goal.restInterval >= 0 ? goal.restInterval : defaultRestDuration;
+        } else {
+          _totalGroups = defaultTotalGroups;
+          _workDuration = defaultWorkDuration;
+          _restDuration = defaultRestDuration;
+        }
+        _remainingTime = _workDuration;
+      });
+    } catch (e) {
+      // Fallback to default values in case of any error
+      setState(() {
+        _totalGroups = defaultTotalGroups;
+        _workDuration = defaultWorkDuration;
+        _restDuration = defaultRestDuration;
+        _remainingTime = _workDuration;
+      });
+      debugPrint('Error loading settings: $e');
+    }
   }
 
   void _startTimer() {
+    // Cancel any existing timer before starting a new one
+    _cancelTimer();
+    
     setState(() {
       _isRunning = true;
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        _cancelTimer();
+        return;
+      }
+      
       setState(() {
         if (_remainingTime > 0) {
           _remainingTime--;
@@ -84,24 +117,27 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   }
 
   void _pauseTimer() {
+    if (!_isRunning) return;
+    
     setState(() {
       _isRunning = false;
     });
-    _timer?.cancel();
+    _cancelTimer();
   }
 
   void _resetTimer() {
+    _cancelTimer();
+    
     setState(() {
       _isRunning = false;
       _currentState = TimerState.setup;
       _currentGroup = 1;
       _remainingTime = _workDuration;
     });
-    _timer?.cancel();
   }
 
   void _handleTimerComplete() {
-    _timer?.cancel();
+    _cancelTimer();
 
     setState(() {
       if (_currentState == TimerState.work) {
@@ -167,57 +203,89 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   }
 
   void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
-    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
+    if (!mounted) return;
+    
+    try {
+      final nextExercise = trainingModel.getExerciseById(nextExerciseId);
+      if (nextExercise == null) {
+        debugPrint('Exercise with id $nextExerciseId not found');
+        return;
+      }
 
-    if (nextExercise != null) {
+      String route;
       if (nextExerciseId == 'foot_ball_rolling') {
-        context.go('/foot-ball-rolling/$nextExerciseId');
+        route = '/foot-ball-rolling/$nextExerciseId';
       } else if (nextExercise.type == ExerciseType.timer) {
         // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
         if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          context.go('/group-timer/$nextExerciseId');
+          route = '/group-timer/$nextExerciseId';
         } else {
-          context.go('/timer/$nextExerciseId');
+          route = '/timer/$nextExerciseId';
         }
       } else {
-        context.go('/counter/$nextExerciseId');
+        route = '/counter/$nextExerciseId';
+      }
+      
+      if (mounted) {
+        context.go(route);
+      }
+    } catch (e) {
+      debugPrint('Error starting next training: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('无法开始下一个训练，请重试')),
+        );
       }
     }
   }
 
   void _showCompletionScreen({String? nextExerciseId, required int totalDuration}) {
-    final trainingModel = Provider.of<TrainingModel>(context, listen: false);
+    if (!mounted) return;
+    
+    try {
+      final trainingModel = Provider.of<TrainingModel>(context, listen: false);
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => TrainingCompletionScreen(
-        exerciseId: widget.exerciseId,
-        count: _totalGroups,
-        duration: totalDuration,
-        sets: _totalGroups,
-        repsPerSet: 1,
-        onRestart: () {
-          Navigator.of(context).pop();
-          _resetTimer();
-          _startWorkout();
-        },
-        onReturnHome: () {
-          Navigator.of(context).pop();
-          // Clear sequential mode when returning to home
-          trainingModel.clearSequentialMode();
-          context.pop();
-        },
-        onNextTraining: nextExerciseId != null ? () {
-          Navigator.of(context).pop();
-          _startNextTraining(nextExerciseId, trainingModel);
-          // 延迟移动到下一个练习，确保新页面能正确获取当前练习ID
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            trainingModel.moveToNextSequentialExercise();
-          });
-        } : null,
-      ),
-    );
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => TrainingCompletionScreen(
+          exerciseId: widget.exerciseId,
+          count: _totalGroups,
+          duration: totalDuration,
+          sets: _totalGroups,
+          repsPerSet: 1,
+          onRestart: () {
+            if (context.mounted) {
+              Navigator.of(context).pop();
+              _resetTimer();
+              _startWorkout();
+            }
+          },
+          onReturnHome: () {
+            if (context.mounted) {
+              Navigator.of(context).pop();
+              // Clear sequential mode when returning to home
+              trainingModel.clearSequentialMode();
+              context.pop();
+            }
+          },
+          onNextTraining: nextExerciseId != null ? () {
+            if (context.mounted) {
+              Navigator.of(context).pop();
+              _startNextTraining(nextExerciseId, trainingModel);
+              // 延迟移动到下一个练习，确保新页面能正确获取当前练习ID
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  trainingModel.moveToNextSequentialExercise();
+                }
+              });
+            }
+          } : null,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error showing completion screen: $e');
+    }
   }
 
 
@@ -252,6 +320,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
       case TimerState.completed:
         return Colors.blue;
     }
+    // Add a default return value to satisfy the non-null return type
+    return Colors.grey;
   }
 
   @override
