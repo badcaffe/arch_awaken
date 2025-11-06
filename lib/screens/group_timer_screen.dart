@@ -209,39 +209,9 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
 
   void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
     if (!mounted) return;
-    
-    try {
-      final nextExercise = trainingModel.getExerciseById(nextExerciseId);
-      if (nextExercise == null) {
-        debugPrint('Exercise with id $nextExerciseId not found');
-        return;
-      }
 
-      String route;
-      if (nextExerciseId == 'foot_ball_rolling') {
-        route = '/foot-ball-rolling/$nextExerciseId';
-      } else if (nextExercise.type == ExerciseType.timer) {
-        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          route = '/group-timer/$nextExerciseId';
-        } else {
-          route = '/timer/$nextExerciseId';
-        }
-      } else {
-        route = '/counter/$nextExerciseId';
-      }
-      
-      if (mounted) {
-        context.go(route);
-      }
-    } catch (e) {
-      debugPrint('Error starting next training: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('无法开始下一个训练，请重试')),
-        );
-      }
-    }
+    // Navigate to intro screen first for sequential training
+    context.go('/exercise-intro/$nextExerciseId');
   }
 
   void _showCompletionScreen({String? nextExerciseId, required int totalDuration}) {
@@ -325,8 +295,6 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
       case TimerState.completed:
         return Colors.blue;
     }
-    // Add a default return value to satisfy the non-null return type
-    return Colors.grey;
   }
 
   @override

@@ -68,7 +68,7 @@ class TrainingModel extends ChangeNotifier {
     ),
     TrainingExercise(
       id: 'ball_tiptoe',
-      name: '夹球踮脚',
+      name: '夹球提踵',
       description: '',
       type: ExerciseType.counter,
       icon: Icons.sports_baseball,
@@ -76,7 +76,7 @@ class TrainingModel extends ChangeNotifier {
     ),
     TrainingExercise(
       id: 'yoga_brick_tiptoe',
-      name: '瑜伽砖踮脚',
+      name: '瑜伽砖提踵',
       description: '',
       type: ExerciseType.counter,
       icon: Icons.square,

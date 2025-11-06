@@ -480,7 +480,6 @@ class _CounterScreenState extends State<CounterScreen> {
 
   void _completeTraining() {
     final trainingModel = Provider.of<TrainingModel>(context, listen: false);
-    final goalModel = Provider.of<GoalModel>(context, listen: false);
 
     final record = TrainingRecord(
       exerciseId: widget.exerciseId,
@@ -512,22 +511,8 @@ class _CounterScreenState extends State<CounterScreen> {
 
 
   void _startNextTraining(String nextExerciseId, TrainingModel trainingModel) {
-    final nextExercise = trainingModel.getExerciseById(nextExerciseId);
-
-    if (nextExercise != null) {
-      if (nextExerciseId == 'foot_ball_rolling') {
-        context.go('/foot-ball-rolling/$nextExerciseId');
-      } else if (nextExercise.type == ExerciseType.timer) {
-        // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-        if (nextExerciseId == 'frog_pose' || nextExerciseId == 'stretching') {
-          context.go('/group-timer/$nextExerciseId');
-        } else {
-          context.go('/timer/$nextExerciseId');
-        }
-      } else {
-        context.go('/counter/$nextExerciseId');
-      }
-    }
+    // Navigate to intro screen first for sequential training
+    context.go('/exercise-intro/$nextExerciseId');
   }
 
   void _showRegularCompletionScreen({String? nextExerciseId}) {

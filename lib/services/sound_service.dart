@@ -49,16 +49,24 @@ class SoundService {
     try {
       // 使用同一个AudioPlayer实例，但先停止当前播放的声音
       await _player.stop();
-      await _player.play(AssetSource(soundPath));
+
+      // 检查音频文件是否存在
+      final assetSource = AssetSource(soundPath);
+      print('🔊 播放音频: $soundPath');
+
+      await _player.play(assetSource);
+
       // 监听播放状态
       _player.onPlayerStateChanged.listen((state) {
+        print('🔊 音频状态: $state for $soundPath');
       });
 
       _player.onPlayerComplete.listen((_) {
+        print('🔊 音频播放完成: $soundPath');
       });
 
     } catch (e) {
-		// swallow exception
+      print('❌ 音频播放失败: $soundPath, 错误: $e');
     }
   }
 

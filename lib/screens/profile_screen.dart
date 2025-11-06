@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../models/theme_model.dart' hide AppTheme;
 import '../theme/app_theme.dart';
 
 class ProfileScreen extends StatelessWidget {
