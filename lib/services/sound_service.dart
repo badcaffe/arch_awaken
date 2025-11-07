@@ -33,9 +33,21 @@ class SoundService {
     await _playSound(soundPath);
   }
 
+  /// 播放开始声音
+  Future<void> playStartSound() async {
+    final soundPath = 'sounds/start.mp3';
+    await _playSound(soundPath);
+  }
+
   /// 播放休息结束声音
   Future<void> playRestEndSound() async {
     final soundPath = 'sounds/rest-end.mp3';
+    await _playSound(soundPath);
+  }
+
+  /// 播放所有训练完成声音
+  Future<void> playAllDoneSound() async {
+    final soundPath = 'sounds/all_done.mp3';
     await _playSound(soundPath);
   }
 

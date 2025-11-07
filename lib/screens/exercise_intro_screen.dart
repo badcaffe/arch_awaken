@@ -88,12 +88,8 @@ class _ExerciseIntroScreenState extends State<ExerciseIntroScreen> {
     if (widget.exerciseId == 'foot_ball_rolling') {
       route = '/foot-ball-rolling/${widget.exerciseId}';
     } else if (exercise.type == ExerciseType.timer) {
-      // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-      if (widget.exerciseId == 'frog_pose' || widget.exerciseId == 'stretching') {
-        route = '/group-timer/${widget.exerciseId}';
-      } else {
-        route = '/timer/${widget.exerciseId}';
-      }
+      // 所有计时训练都使用组计时器
+      route = '/group-timer/${widget.exerciseId}';
     } else {
       route = '/counter/${widget.exerciseId}';
     }

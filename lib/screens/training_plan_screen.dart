@@ -266,12 +266,8 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                             if (exerciseId == 'foot_ball_rolling') {
                               context.go('/foot-ball-rolling/$exerciseId');
                             } else if (exercise.type == ExerciseType.timer) {
-                              // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-                              if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
-                                context.go('/group-timer/$exerciseId');
-                              } else {
-                                context.go('/timer/$exerciseId');
-                              }
+                              // 所有计时训练都使用组计时器
+                              context.go('/group-timer/$exerciseId');
                             } else {
                               context.go('/counter/$exerciseId');
                             }
@@ -286,12 +282,8 @@ class _TrainingPlanScreenState extends State<TrainingPlanScreen> {
                             if (exerciseId == 'foot_ball_rolling') {
                               context.go('/foot-ball-rolling/$exerciseId');
                             } else if (exercise.type == ExerciseType.timer) {
-                              // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-                              if (exerciseId == 'frog_pose' || exerciseId == 'stretching') {
-                                context.go('/group-timer/$exerciseId');
-                              } else {
-                                context.go('/timer/$exerciseId');
-                              }
+                              // 所有计时训练都使用组计时器
+                              context.go('/group-timer/$exerciseId');
                             } else {
                               context.go('/counter/$exerciseId');
                             }

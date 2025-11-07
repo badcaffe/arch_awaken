@@ -224,6 +224,19 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
     // Play cheer sound
     final soundService = SoundService();
     soundService.playCheerSound();
+
+    // Check if we're in sequential training mode and this is the last exercise
+    if (trainingModel.isSequentialTrainingActive) {
+      final nextExerciseId = trainingModel.getNextSequentialExercise();
+
+      if (nextExerciseId == null) {
+        // End of sequence - play all done sound after 1 second delay
+        Future.delayed(const Duration(seconds: 3), () {
+          soundService.playAllDoneSound();
+        });
+        trainingModel.stopSequentialTraining();
+      }
+    }
   }
 
   void _showCompletionDialog() {
@@ -233,6 +246,11 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
     String? nextExerciseId;
     if (trainingModel.isSequentialTrainingActive) {
       nextExerciseId = trainingModel.getNextSequentialExercise();
+
+      // If this is the last exercise, stop sequential training
+      if (nextExerciseId == null) {
+        trainingModel.stopSequentialTraining();
+      }
     }
 
     showDialog(

@@ -31,7 +31,12 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   int _remainingTime = 0;
   bool _isRunning = false;
   Timer? _timer;
-  
+  final SoundService _soundService = SoundService();
+
+  // 倒计时相关变量
+  int _countdownValue = 5;
+  Timer? _countdownTimer;
+
   // Constants for default values
   static const int defaultTotalGroups = 3;
   static const int defaultWorkDuration = 60; // 60 seconds
@@ -62,6 +67,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
   void _cancelTimer() {
     _timer?.cancel();
     _timer = null;
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
   }
 
   void _loadSettings() {
@@ -110,6 +117,11 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
       setState(() {
         if (_remainingTime > 0) {
           _remainingTime--;
+
+          // 在工作时间，播放10的整数倍的gudu声（除了初始时间）
+          if (_currentState == TimerState.work && _remainingTime > 0 && _remainingTime % 10 == 0) {
+            _soundService.playGuduSound();
+          }
         } else {
           _handleTimerComplete();
         }
@@ -128,12 +140,13 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
 
   void _resetTimer() {
     _cancelTimer();
-    
+
     setState(() {
       _isRunning = false;
       _currentState = TimerState.setup;
       _currentGroup = 1;
       _remainingTime = _workDuration;
+      _countdownValue = 5;
     });
   }
 
@@ -146,6 +159,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         if (_currentGroup < _totalGroups) {
           _currentState = TimerState.rest;
           _remainingTime = _restDuration;
+          // 播放开始休息的声音
+          _soundService.playStartSound();
           _isRunning = true; // 保持运行状态，自动开始休息计时
           _startTimer(); // 自动开始休息计时
         } else {
@@ -167,11 +182,37 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
 
   void _startWorkout() {
     setState(() {
-      _currentState = TimerState.work;
+      _currentState = TimerState.countdown;
       _currentGroup = 1;
-      _remainingTime = _workDuration;
+      _countdownValue = 5;
     });
-    _startTimer();
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    // 播放倒计时开始的声音
+    _soundService.playCountdownSound();
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        if (_countdownValue > 1) {
+          _countdownValue--;
+          _soundService.playCountdownSound();
+        } else {
+          // 倒计时结束，开始工作
+          _currentState = TimerState.work;
+          _remainingTime = _workDuration;
+          _countdownValue = 5;
+          timer.cancel();
+          _startTimer();
+        }
+      });
+    });
   }
 
   void _saveRecord() {
@@ -187,10 +228,9 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     trainingModel.addRecord(record);
 
     // Play cheer sound
-    final soundService = SoundService();
-    soundService.playCheerSound();
+    _soundService.playCheerSound();
 
-    // Check if we're in sequential training mode
+    // Check if we're in sequential training mode and this is the last exercise
     if (trainingModel.isSequentialTrainingActive) {
       final nextExerciseId = trainingModel.getNextSequentialExercise();
 
@@ -198,7 +238,10 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         // Show completion screen with next training option
         _showCompletionScreen(nextExerciseId: nextExerciseId, totalDuration: totalDuration);
       } else {
-        // End of sequence
+        // End of sequence - play all done sound after 1 second delay
+        Future.delayed(const Duration(seconds: 3), () {
+          _soundService.playAllDoneSound();
+        });
         trainingModel.stopSequentialTraining();
         _showCompletionScreen(totalDuration: totalDuration);
       }
@@ -275,6 +318,8 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     switch (_currentState) {
       case TimerState.setup:
         return '准备开始';
+      case TimerState.countdown:
+        return '$_countdownValue 秒后开始';
       case TimerState.work:
         return '第 $_currentGroup 组';
       case TimerState.rest:
@@ -288,8 +333,10 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
     switch (_currentState) {
       case TimerState.setup:
         return Colors.grey;
+      case TimerState.countdown:
+        return Colors.orange;
       case TimerState.work:
-        return Colors.red;
+        return exercise.color; // 使用训练项目的主题色而不是红色
       case TimerState.rest:
         return Colors.green;
       case TimerState.completed:
@@ -443,7 +490,9 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
         ),
         child: Center(
           child: Text(
-            _formatTime(_remainingTime),
+            _currentState == TimerState.countdown
+                ? _countdownValue.toString()
+                : _formatTime(_remainingTime),
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
@@ -472,11 +521,11 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
           ),
         ),
       );
-    } else if (_currentState == TimerState.work || _currentState == TimerState.rest) {
+    } else if (_currentState == TimerState.countdown || _currentState == TimerState.work || _currentState == TimerState.rest) {
       if (!_isRunning) {
         buttons.add(
           IconButton(
-            onPressed: _startTimer,
+            onPressed: _currentState == TimerState.countdown ? _startCountdown : _startTimer,
             icon: const Icon(Icons.play_arrow),
             style: IconButton.styleFrom(
               backgroundColor: Colors.green,
@@ -521,8 +570,9 @@ class _GroupTimerScreenState extends State<GroupTimerScreen> {
 }
 
 enum TimerState {
-  setup,    // 设置状态
-  work,     // 工作计时
-  rest,     // 休息计时
-  completed // 完成
+  setup,     // 设置状态
+  countdown, // 倒计时状态
+  work,      // 工作计时
+  rest,      // 休息计时
+  completed  // 完成
 }

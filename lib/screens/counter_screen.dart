@@ -500,7 +500,10 @@ class _CounterScreenState extends State<CounterScreen> {
         // Show completion screen with next training option
         _showRegularCompletionScreen(nextExerciseId: nextExerciseId);
       } else {
-        // End of sequence
+        // End of sequence - play all done sound after 1 second delay
+        Future.delayed(const Duration(seconds: 3), () {
+          _soundService.playAllDoneSound();
+        });
         trainingModel.stopSequentialTraining();
         _showRegularCompletionScreen();
       }

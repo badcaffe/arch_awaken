@@ -10,7 +10,6 @@ import 'screens/main_tab_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/training_plan_screen.dart';
 import 'screens/training_records_screen.dart';
-import 'screens/timer_screen.dart';
 import 'screens/counter_screen.dart';
 import 'screens/theme_selection_screen.dart';
 import 'screens/goal_setting_screen.dart';
@@ -63,13 +62,6 @@ class ArchAwakenApp extends StatelessWidget {
               builder: (BuildContext context, GoRouterState state) {
                 final exerciseId = state.pathParameters['exerciseId']!;
                 return TrainingIntroductionScreen(exerciseId: exerciseId);
-              },
-            ),
-            GoRoute(
-              path: 'timer/:exerciseId',
-              builder: (BuildContext context, GoRouterState state) {
-                final exerciseId = state.pathParameters['exerciseId']!;
-                return TimerScreen(exerciseId: exerciseId);
               },
             ),
             GoRoute(

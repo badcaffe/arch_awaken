@@ -191,12 +191,8 @@ class TrainingIntroductionScreen extends StatelessWidget {
                   if (themedExercise.id == 'foot_ball_rolling') {
                     context.go('/foot-ball-rolling/${themedExercise.id}');
                   } else if (themedExercise.type == ExerciseType.timer) {
-                    // 青蛙趴和拉伸使用组计时器，其他计时训练使用简单计时器
-                    if (themedExercise.id == 'frog_pose' || themedExercise.id == 'stretching') {
-                      context.go('/group-timer/${themedExercise.id}');
-                    } else {
-                      context.go('/timer/${themedExercise.id}');
-                    }
+                    // 所有计时训练都使用组计时器
+                    context.go('/group-timer/${themedExercise.id}');
                   } else {
                     context.go('/counter/${themedExercise.id}');
                   }
