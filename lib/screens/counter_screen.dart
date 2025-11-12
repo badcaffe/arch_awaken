@@ -915,7 +915,7 @@ class _CounterScreenState extends State<CounterScreen> {
                                     width: 250,
                                     height: 250,
                                     decoration: BoxDecoration(
-                                      color: displayColor.withValues(alpha: 0.1),
+                                      color: displayColor.withOpacity(0.1),
                                       shape: BoxShape.circle,
                                       border: Border.all(
                                         color: displayColor,
@@ -1116,7 +1116,7 @@ class _CounterScreenState extends State<CounterScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 8,
                   offset: const Offset(0, -2),
                 ),

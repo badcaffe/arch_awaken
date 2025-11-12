@@ -124,7 +124,7 @@ class _ExerciseIntroScreenState extends State<ExerciseIntroScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withOpacity(0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(

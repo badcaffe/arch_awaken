@@ -155,7 +155,7 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -171,7 +171,7 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                 Container(
                   height: 180,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: color.withOpacity(0.1),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -191,7 +191,7 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: color.withValues(alpha: 0.5),
+                                  color: color.withOpacity(0.5),
                                   blurRadius: 15,
                                   offset: const Offset(0, 5),
                                 ),
@@ -423,7 +423,7 @@ class _TrainingCompletionScreenState extends State<TrainingCompletionScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
