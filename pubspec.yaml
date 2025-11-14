@@ -43,7 +43,16 @@ dependencies:
 
   # Local storage for training records
   shared_preferences: ^2.3.2
-  audioplayers: ^5.2.1
+
+  # Audio playback - supports multiple platforms
+  # audioplayers: ^5.2.1          # For Android, iOS, Web, Windows, macOS, Linux
+  # just_audio: ^0.9.36           # For regular platforms (Android, iOS, Web, etc.)
+
+  # HarmonyOS specific audio plugin (includes audio_session)
+  just_audio_ohos:
+    git:
+      url: https://gitcode.com/openharmony-sig/fluttertpc_just_audio
+      path: just_audio/ohos
 
 dev_dependencies:
   flutter_test:

@@ -31,7 +31,8 @@ class _ExerciseIntroScreenState extends State<ExerciseIntroScreen> {
 
   @override
   void dispose() {
-    _soundService.dispose();
+    // Don't dispose the singleton SoundService instance
+    // This allows it to be reused across screens
     super.dispose();
   }
 
@@ -48,7 +49,7 @@ class _ExerciseIntroScreenState extends State<ExerciseIntroScreen> {
     final startTime = DateTime.now();
 
     // Play exercise name audio
-    final soundPath = 'sounds/${exercise.name}.mp3';
+    final soundPath = 'assets/sounds/${exercise.name}.mp3';
     print('🎵 尝试播放练习音频: $soundPath');
     try {
       await _soundService.playCustomSound(soundPath);

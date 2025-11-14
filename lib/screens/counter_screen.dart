@@ -89,7 +89,7 @@ class _CounterScreenState extends State<CounterScreen> {
     _autoCounterTimer?.cancel();
     _trainingTimer?.cancel();
     _longPressTimer?.cancel();
-    _soundService.dispose();
+    // Don't dispose the singleton SoundService instance
     super.dispose();
   }
 

@@ -150,7 +150,7 @@ class _FootBallRollingScreenState extends State<FootBallRollingScreen> {
     final soundService = SoundService();
     final footName = _isLeftFoot ? 'left' : 'right';
     final rollingName = _getRollingTypeSoundName(_currentRollingType);
-    final soundPath = 'sounds/foot-ball-rolling-$footName-$rollingName.mp3';
+    final soundPath = 'assets/sounds/foot-ball-rolling-$footName-$rollingName.mp3';
 
     try {
       await soundService.playCustomSound(soundPath);
