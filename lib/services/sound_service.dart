@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+
 // Abstract class to define the audio interface
 abstract class _AudioPlayerInterface {
   Future<void> play(dynamic source);
@@ -18,29 +21,97 @@ class _SoundService {
 
   Future<void> _initializeAudio() async {
     // Check if we're on HarmonyOS or other unsupported platform
-    if (_isUnsupportedPlatform()) {
-      print('🔇 Audio not supported on this platform');
+    final isUnsupported = await _isUnsupportedPlatform();
+
+    if (isUnsupported) {
+      print('🔇 Audio not supported on this platform (detected at init)');
       _isAudioSupported = false;
       _player = _NoOpAudioPlayer();
       return;
     }
 
+    // Try to initialize audio players
     try {
-      // Try to initialize audio players
       _player = _AudioPlayerImpl();
       _isAudioSupported = true;
+      print('✅ Audio player initialized successfully');
     } catch (e) {
-      print('⚠️ Audio plugin not supported on this platform: $e');
+      print('⚠️ Audio plugin initialization failed: $e');
       _isAudioSupported = false;
       _player = _NoOpAudioPlayer();
     }
   }
 
-  bool _isUnsupportedPlatform() {
-    // HarmonyOS and other platforms that don't support audioplayers
-    // Since there's no direct way to detect HarmonyOS in Dart,
-    // we'll catch the MissingPluginException instead
-    return false; // We'll handle this at runtime
+  /// Platform detection approach 1: Check Platform.operatingSystem
+  bool _isHarmonyOSByPlatform() {
+    final os = Platform.operatingSystem.toLowerCase();
+    if (os == 'harmonyos') {
+      print('✅ Detected HarmonyOS via Platform.operatingSystem');
+      return true;
+    }
+    return false;
+  }
+
+  /// Platform detection approach 2a: Check system property via getprop
+  Future<bool> _isHarmonyOSBySystemProperty() async {
+    try {
+      // Check for HarmonyOS-specific system property
+      final result = await Process.run('getprop', ['ro.build.harmonyos']);
+
+      if (result.exitCode == 0) {
+        final output = result.stdout.toString().trim();
+        print('✅ Detected HarmonyOS via getprop: $output');
+        return output.isNotEmpty && output != '0' && output != 'false';
+      }
+    } catch (e) {
+      // getprop command not available on this platform
+    }
+    return false;
+  }
+
+  /// Platform detection approach 2b: Check OS version string
+  bool _isHarmonyOSByVersionString() {
+    // Check if the OS version string contains HarmonyOS indicators
+    final version = Platform.operatingSystemVersion.toLowerCase();
+
+    if (version.contains('harmonyos')) {
+      print('✅ Detected HarmonyOS via operatingSystemVersion');
+      return true;
+    }
+
+    // Check build fingerprint for HarmonyOS
+    if (version.contains('harmony')) {
+      print('✅ Detected HarmonyOS via build fingerprint');
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Combined platform detection: Check if platform doesn't support audio plugin
+  Future<bool> _isUnsupportedPlatform() async {
+    // Check 1: Platform operating system name
+    if (_isHarmonyOSByPlatform()) {
+      return true;
+    }
+
+    // Check 2a: System properties for HarmonyOS (if running on Android device)
+    if (Platform.operatingSystem == 'android') {
+      final isHarmonyOSByProp = await _isHarmonyOSBySystemProperty();
+      if (isHarmonyOSByProp) {
+        return true;
+      }
+
+      // Check 2b: OS version string
+      final isHarmonyOSByVersion = _isHarmonyOSByVersionString();
+      if (isHarmonyOSByVersion) {
+        return true;
+      }
+    }
+
+    // Platform is likely supported
+    print('🔊 Audio plugin supported on this platform');
+    return false;
   }
 
   /// 播放数字声音文件
